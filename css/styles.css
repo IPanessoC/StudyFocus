@@ -39,3 +39,36 @@
     width: 6px; height: 6px; background-color: #F4F6F0; border-radius: 50%;
     position: absolute; bottom: 6px;
 }
+
+/* Mini Player Mode (YouTube PiP Simulation) */
+.mini-player {
+    position: fixed !important;
+    bottom: 95px !important; /* Arriba de la barra de navegación móvil */
+    right: 20px !important;
+    width: 280px !important;
+    height: 158px !important; /* Relación de aspecto 16:9 aprox */
+    z-index: 50;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    border-radius: 1rem !important;
+    border: 2px solid #5C8353;
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Ajuste en escritorio */
+@media (min-width: 768px) {
+    .mini-player {
+        bottom: 30px !important;
+        right: 30px !important;
+        width: 350px !important;
+        height: 197px !important;
+    }
+}
+
+@keyframes popIn {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.mini-player #btn-close-yt {
+    display: block !important;
+}
