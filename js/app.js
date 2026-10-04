@@ -1,6 +1,6 @@
 // js/app.js
 const state = {
-    alarms: [], routines: [],
+    alarms: [], routines: [], playlists: [],
     is24h: localStorage.getItem('studyfocus_is24h') !== 'false',
     daysMap: ['D', 'L', 'M', 'X', 'J', 'V', 'S'],
     lastRungMinute: null,
@@ -24,7 +24,8 @@ const ui = {
     
     // YouTube Media
     ytMediaUrl: document.getElementById('yt-media-url'), btnLoadYt: document.getElementById('btn-load-yt'), ytPlayerContainer: document.getElementById('yt-player-container'), ytIframe: document.getElementById('yt-iframe'), btnCloseYt: document.getElementById('btn-close-yt'),
-    pomYtUrl: document.getElementById('pom-yt-url'), alarmAudioFrame: document.getElementById('alarm-audio-frame')
+    pomYtUrl: document.getElementById('pom-yt-url'), alarmAudioFrame: document.getElementById('alarm-audio-frame'),
+    moodBtns: document.querySelectorAll('.mood-btn'), currentYtDisplayContainer: document.getElementById('current-yt-display-container'), currentYtUrlDisplay: document.getElementById('current-yt-url-display'), btnSavePlaylist: document.getElementById('btn-save-playlist'), savedPlaylistsContainer: document.getElementById('saved-playlists-container')
 };
 
 // --- Utilidades ---
@@ -42,9 +43,15 @@ const showToast = (msg) => {
     }, 3000);
 };
 
-const extractYTId = (url) => {
-    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|music\?v=|.*[&?]v=))([^&]{11})/);
-    return match ? match[1] : null;
+// Nueva utilidad robusta que extrae el URL de incrustación ya sea de un Video o una Playlist completa
+const getEmbedUrl = (url) => {
+    const playlistMatch = url.match(/[?&]list=([^&#]+)/);
+    if (playlistMatch) return `https://www.youtube.com/embed/videoseries?list=${playlistMatch[1]}&autoplay=1`;
+    
+    const videoMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|music\?v=|.*[&?]v=))([^&]{11})/);
+    if (videoMatch) return `https://www.youtube.com/embed/${videoMatch[1]}?autoplay=1`;
+    
+    return null;
 };
 
 // --- Inicialización y Datos ---
@@ -53,9 +60,11 @@ const loadData = async () => {
         await window.AppDB.initDB();
         state.alarms = await window.AppDB.getAllAlarms();
         state.routines = await window.AppDB.getAllRoutines();
+        state.playlists = await window.AppDB.getAllPlaylists() || [];
         ui.pomYtUrl.value = localStorage.getItem('studyfocus_pom_yt') || '';
         renderAlarms();
         renderCalendar();
+        renderPlaylists();
         updateSelectedDayView();
     } catch (error) {
         console.error("Error BD:", error);
@@ -83,7 +92,6 @@ ui.btnInstall.addEventListener('click', async () => {
     }
 });
 
-// Comprobar si ya está instalada (Standalone) para ocultar el botón
 const checkStandaloneMode = () => {
     if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
         ui.installContainer.classList.add('hidden');
@@ -116,18 +124,24 @@ const updateMiniPlayerStatus = () => {
     }
 };
 
-ui.btnLoadYt.addEventListener('click', () => {
-    const url = ui.ytMediaUrl.value;
-    const vidId = extractYTId(url);
-    if(vidId) {
-        ui.ytIframe.src = `https://www.youtube.com/embed/${vidId}?autoplay=1`;
+const playMedia = (url) => {
+    const embedUrl = getEmbedUrl(url);
+    if(embedUrl) {
+        ui.ytIframe.src = embedUrl;
         ui.ytPlayerContainer.classList.remove('hidden');
         isYtPlaying = true;
+        
+        ui.currentYtUrlDisplay.textContent = url;
+        ui.currentYtDisplayContainer.classList.remove('hidden');
+        ui.currentYtDisplayContainer.classList.add('flex');
+        
         showToast("Reproduciendo Medios");
     } else {
-        showToast("URL de YouTube inválida");
+        showToast("URL de YouTube Music inválida");
     }
-});
+};
+
+ui.btnLoadYt.addEventListener('click', () => playMedia(ui.ytMediaUrl.value));
 
 ui.btnCloseYt.addEventListener('click', () => {
     ui.ytIframe.src = "";
@@ -135,7 +149,75 @@ ui.btnCloseYt.addEventListener('click', () => {
     ui.ytPlayerContainer.classList.remove('mini-player');
     document.getElementById('yt-section').appendChild(ui.ytPlayerContainer);
     isYtPlaying = false;
+    
+    ui.currentYtDisplayContainer.classList.add('hidden');
+    ui.currentYtDisplayContainer.classList.remove('flex');
 });
+
+// --- Filtros de Ánimo (YouTube Music) ---
+const moodPlaylists = {
+    relax: ['PLMC9KNkIncKtPzgY-5rmhvj7fax8fdxoj', 'PLofht4dAwjwM4tS8G-G2T_s4h7iYd1A1u', 'PLzYd4T86KGE_R63Giyf5hUq8pU9QO_G-E'],
+    focus: ['PLofht4dAwjwP6xY42L_iC4Z-2-XF50lUq', 'PL_QHeE13V1zyVqS6_yW2aOQkXJvX1j17u', 'PLa_r-rN79Y25a8P_P7Y8Vl0qPZq_h6r8P'],
+    feelgood: ['PLDIoUOhQQPlXreCg1i58X5K9R3B_fAotR', 'PL_QHeE13V1zzZ58Fp84t42Oqk_Oq8i-M1', 'PLhSz9E2Z1PZ832a8Vd6U92p1yWp-R1d1B']
+};
+
+ui.moodBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        ui.moodBtns.forEach(b => {
+            b.classList.remove('bg-ac', 'text-white'); b.classList.add('bg-sec', 'text-soft');
+        });
+        btn.classList.remove('bg-sec', 'text-soft'); btn.classList.add('bg-ac', 'text-white');
+
+        const mood = btn.dataset.mood;
+        const list = moodPlaylists[mood];
+        const randomId = list[Math.floor(Math.random() * list.length)];
+        const url = `https://music.youtube.com/playlist?list=${randomId}`;
+        
+        ui.ytMediaUrl.value = url;
+        playMedia(url);
+    });
+});
+
+// --- Playlists Guardadas (Accesos Rápidos) ---
+const renderPlaylists = () => {
+    ui.savedPlaylistsContainer.innerHTML = state.playlists.length === 0 ? '<p class="text-sm text-soft italic w-full">No hay playlists guardadas aún.</p>' : '';
+    state.playlists.forEach(p => {
+        const el = document.createElement('div');
+        el.className = 'flex items-center gap-2 bg-sec/80 border border-sec px-4 py-2 rounded-xl group cursor-pointer hover:bg-ac transition-colors shadow-sm';
+        el.innerHTML = `
+            <span class="text-white font-semibold text-sm truncate max-w-[150px] md:max-w-[200px]" onclick="playSaved('${p.url}')">${p.name}</span>
+            <button class="text-red-400 hover:text-red-200 ml-1 p-1 opacity-60 hover:opacity-100 transition-opacity" onclick="deletePlaylist('${p.id}')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        `;
+        ui.savedPlaylistsContainer.appendChild(el);
+    });
+};
+
+ui.btnSavePlaylist.addEventListener('click', async () => {
+    const currentUrl = ui.ytMediaUrl.value;
+    const name = prompt("Nombre para identificar esta playlist (Ej. Mi Lo-fi favorito):");
+    if (name && name.trim() !== "") {
+        const newPlaylist = { id: generateId(), name: name.trim(), url: currentUrl };
+        state.playlists.push(newPlaylist);
+        await window.AppDB.savePlaylist(newPlaylist);
+        renderPlaylists();
+        showToast("Playlist guardada");
+    }
+});
+
+window.playSaved = (url) => {
+    ui.ytMediaUrl.value = url;
+    ui.moodBtns.forEach(b => { b.classList.remove('bg-ac', 'text-white'); b.classList.add('bg-sec', 'text-soft'); });
+    playMedia(url);
+};
+
+window.deletePlaylist = async (id) => {
+    state.playlists = state.playlists.filter(p => p.id !== id);
+    await window.AppDB.deletePlaylist(id);
+    renderPlaylists();
+    showToast("Eliminada");
+};
 
 // --- Navegación ---
 const switchView = (targetView) => {
@@ -166,7 +248,6 @@ const switchView = (targetView) => {
 [ui.navCalDesktop, ui.navCalMobile].forEach(btn => btn.addEventListener('click', () => switchView('calendar')));
 [ui.navPomDesktop, ui.navPomMobile].forEach(btn => btn.addEventListener('click', () => switchView('pomodoro')));
 [ui.navYtDesktop, ui.navYtMobile].forEach(btn => btn.addEventListener('click', () => switchView('youtube')));
-
 
 // --- Lógica Reloj ---
 const updateClock = () => {
@@ -401,8 +482,8 @@ const triggerRingingModal = (alarm) => {
     ui.modalRinging.classList.remove('hidden'); ui.modalRinging.classList.add('flex');
     
     if (alarm.youtubeUrl) {
-        const vidId = extractYTId(alarm.youtubeUrl);
-        if (vidId) ui.alarmAudioFrame.src = `https://www.youtube.com/embed/${vidId}?autoplay=1`;
+        const embedUrl = getEmbedUrl(alarm.youtubeUrl);
+        if (embedUrl) ui.alarmAudioFrame.src = embedUrl;
     }
     if ("vibrate" in navigator) navigator.vibrate([300, 100, 300, 100, 300]);
 };

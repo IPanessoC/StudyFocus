@@ -1,6 +1,6 @@
 // js/db.js
 const dbName = 'StudyFocusDB';
-const dbVersion = 1;
+const dbVersion = 2; // Actualizado a la versión 2 para soportar guardado de Playlists
 let db;
 
 const initDB = () => {
@@ -19,20 +19,22 @@ const initDB = () => {
 
         request.onupgradeneeded = (event) => {
             const db = event.target.result;
-            // Almacén para Alarmas recurrentes
+            
             if (!db.objectStoreNames.contains('alarms')) {
                 db.createObjectStore('alarms', { keyPath: 'id' });
             }
-            // Almacén para Actividades/Rutinas del Calendario
             if (!db.objectStoreNames.contains('routines')) {
                 const routineStore = db.createObjectStore('routines', { keyPath: 'id' });
                 routineStore.createIndex('date', 'date', { unique: false });
+            }
+            // Nuevo Almacén para Playlists Guardadas
+            if (!db.objectStoreNames.contains('playlists')) {
+                db.createObjectStore('playlists', { keyPath: 'id' });
             }
         };
     });
 };
 
-// Funciones Genéricas para Almacenes
 const getAllItems = (storeName) => {
     return new Promise((resolve, reject) => {
         if (!db) return resolve([]);
@@ -64,13 +66,17 @@ const deleteItem = (storeName, id) => {
     });
 };
 
-// Exportar funciones (Accesibles en el entorno Global por los scripts posteriores)
 window.AppDB = {
     initDB,
     getAllAlarms: () => getAllItems('alarms'),
     saveAlarm: (alarm) => saveItem('alarms', alarm),
     deleteAlarm: (id) => deleteItem('alarms', id),
+    
     getAllRoutines: () => getAllItems('routines'),
     saveRoutine: (routine) => saveItem('routines', routine),
-    deleteRoutine: (id) => deleteItem('routines', id)
+    deleteRoutine: (id) => deleteItem('routines', id),
+    
+    getAllPlaylists: () => getAllItems('playlists'),
+    savePlaylist: (playlist) => saveItem('playlists', playlist),
+    deletePlaylist: (id) => deleteItem('playlists', id)
 };

@@ -46,17 +46,15 @@
             <h1 class="text-2xl font-extrabold tracking-tight">StudyFocus</h1>
         </div>
         <div class="flex gap-4 items-center">
-            <!-- Navegación Escritorio -->
             <nav class="hidden md:flex bg-sec/50 rounded-2xl p-1 gap-1 shadow-inner mr-4">
                 <button id="nav-home-desktop" class="nav-btn px-4 py-2 rounded-xl text-sm font-bold bg-ac text-white shadow-md transition-all">Inicio</button>
                 <button id="nav-pomodoro-desktop" class="nav-btn px-4 py-2 rounded-xl text-sm font-bold text-soft hover:text-white transition-all">Pomodoro</button>
                 <button id="nav-calendar-desktop" class="nav-btn px-4 py-2 rounded-xl text-sm font-bold text-soft hover:text-white transition-all">Calendario</button>
-                <button id="nav-youtube-desktop" class="nav-btn px-4 py-2 rounded-xl text-sm font-bold text-soft hover:text-white transition-all" title="YouTube">
+                <button id="nav-youtube-desktop" class="nav-btn px-4 py-2 rounded-xl text-sm font-bold text-soft hover:text-white transition-all" title="YouTube Music">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M21.582,6.186c-0.23-0.86-0.908-1.538-1.768-1.768C18.254,4,12,4,12,4S5.746,4,4.186,4.418 c-0.86,0.23-1.538,0.908-1.768,1.768C2,7.746,2,12,2,12s0,4.254,0.418,5.814c0.23,0.86,0.908,1.538,1.768,1.768 C5.746,20,12,20,12,20s6.254,0,7.814-0.418c0.86-0.23,1.538-0.908,1.768-1.768C22,16.254,22,12,22,12S22,7.746,21.582,6.186z M10,15.464V8.536L16,12L10,15.464z"/></svg>
                 </button>
             </nav>
 
-            <!-- Contenedor PWA (Botón + Texto Recomendación) -->
             <div id="install-container" class="hidden items-center gap-3">
                 <span class="text-xs font-semibold text-soft max-w-[140px] text-right leading-tight hidden lg:block">Se recomienda el uso directo desde su PWA</span>
                 <button id="btn-install" class="p-3 rounded-2xl bg-ac hover:bg-[#4a6b42] transition-colors shadow-xl text-white font-bold text-sm flex items-center gap-2" title="Instalar Aplicación">
@@ -65,7 +63,6 @@
                 </button>
             </div>
 
-            <!-- Botón PiP y Formato -->
             <button id="btn-pip" class="hidden p-3 rounded-2xl bg-sec hover:bg-ac transition-colors shadow-xl items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
             </button>
@@ -109,16 +106,13 @@
                         <button id="pom-work" class="px-6 py-2 rounded-xl bg-ac text-white font-bold transition-colors">Trabajo</button>
                         <button id="pom-break" class="px-6 py-2 rounded-xl text-soft hover:text-white font-bold transition-colors">Descanso</button>
                     </div>
-                    
                     <h2 id="pom-timer" class="text-7xl md:text-9xl font-black tabular-nums tracking-tighter mb-10 text-white drop-shadow-lg">25:00</h2>
-                    
                     <div class="flex gap-4 w-full">
                         <button id="pom-toggle" class="flex-1 bg-ac hover:bg-[#4a6b42] text-white py-4 rounded-2xl font-black text-xl shadow-xl transition-transform hover:scale-105">INICIAR</button>
                         <button id="pom-reset" class="bg-bg text-soft hover:text-white px-6 py-4 rounded-2xl font-bold text-xl transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                         </button>
                     </div>
-                    
                     <div class="mt-8 w-full border-t border-bg pt-6">
                         <label class="block text-sm font-bold text-soft mb-2">URL Sonido Pomodoro (YouTube)</label>
                         <input type="text" id="pom-yt-url" placeholder="Pega el enlace de la canción para la alarma..." class="w-full bg-bg border-none rounded-xl p-3 text-white text-sm focus:ring-2 focus:ring-ac outline-none transition-all">
@@ -161,27 +155,53 @@
 
         <!-- VISTA: YOUTUBE MEDIA -->
         <div id="view-youtube" class="view-section hidden opacity-0 transition-opacity duration-300">
-            <section id="yt-section" class="max-w-4xl mx-auto flex flex-col gap-6">
-                <div class="flex items-center gap-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#FF0000" viewBox="0 0 24 24"><path d="M21.582,6.186c-0.23-0.86-0.908-1.538-1.768-1.768C18.254,4,12,4,12,4S5.746,4,4.186,4.418 c-0.86,0.23-1.538,0.908-1.768,1.768C2,7.746,2,12,2,12s0,4.254,0.418,5.814c0.23,0.86,0.908,1.538,1.768,1.768 C5.746,20,12,20,12,20s6.254,0,7.814-0.418c0.86-0.23,1.538-0.908,1.768-1.768C22,16.254,22,12,22,12S22,7.746,21.582,6.186z M10,15.464V8.536L16,12L10,15.464z"/></svg>
-                    <h3 class="text-3xl font-bold">Medios</h3>
+            <section id="yt-section" class="max-w-4xl mx-auto flex flex-col gap-5">
+                
+                <!-- Cabecera YouTube Music y Búsqueda Externa -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#FF0000" viewBox="0 0 24 24"><path d="M21.582,6.186c-0.23-0.86-0.908-1.538-1.768-1.768C18.254,4,12,4,12,4S5.746,4,4.186,4.418 c-0.86,0.23-1.538,0.908-1.768,1.768C2,7.746,2,12,2,12s0,4.254,0.418,5.814c0.23,0.86,0.908,1.538,1.768,1.768 C5.746,20,12,20,12,20s6.254,0,7.814-0.418c0.86-0.23,1.538-0.908,1.768-1.768C22,16.254,22,12,22,12S22,7.746,21.582,6.186z M10,15.464V8.536L16,12L10,15.464z"/></svg>
+                        <h3 class="text-3xl font-bold tracking-tight">YouTube Music</h3>
+                    </div>
+                    <a href="https://music.youtube.com" target="_blank" rel="noopener noreferrer" class="bg-sec/80 text-light px-5 py-2.5 rounded-xl text-sm font-bold shadow-md hover:bg-sec transition-colors flex items-center justify-center gap-2">
+                        Busca más playlist <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                    </a>
+                </div>
+
+                <!-- Filtros de Ánimo -->
+                <div class="flex gap-2 overflow-x-auto pb-2 scroll-smooth">
+                    <button data-mood="relax" class="mood-btn px-6 py-2.5 rounded-full bg-sec text-soft hover:bg-ac hover:text-white font-bold transition-all shadow-md whitespace-nowrap">Relax</button>
+                    <button data-mood="focus" class="mood-btn px-6 py-2.5 rounded-full bg-sec text-soft hover:bg-ac hover:text-white font-bold transition-all shadow-md whitespace-nowrap">Concentración</button>
+                    <button data-mood="feelgood" class="mood-btn px-6 py-2.5 rounded-full bg-sec text-soft hover:bg-ac hover:text-white font-bold transition-all shadow-md whitespace-nowrap">Sentirse Bien</button>
                 </div>
                 
-                <div class="flex flex-col md:flex-row gap-3">
-                    <select id="yt-theme" class="bg-sec text-white p-3 rounded-xl outline-none font-bold">
-                        <option value="yt">YouTube Normal</option>
-                        <option value="ytm">YouTube Music</option>
-                    </select>
-                    <input type="text" id="yt-media-url" placeholder="Pega el enlace del video o canción aquí..." class="flex-1 bg-sec border-none rounded-xl p-3 text-white focus:ring-2 focus:ring-ac outline-none transition-all">
-                    <button id="btn-load-yt" class="bg-ac text-white px-6 py-3 rounded-xl font-bold hover:scale-105 transition-transform">Reproducir</button>
+                <!-- Búsqueda y URL -->
+                <div class="flex flex-col gap-2">
+                    <div class="flex flex-col md:flex-row gap-3">
+                        <input type="text" id="yt-media-url" placeholder="Pega el enlace de la playlist o canción de YouTube Music..." class="flex-1 bg-sec border-none rounded-xl p-4 text-white focus:ring-2 focus:ring-ac outline-none shadow-inner transition-all">
+                        <button id="btn-load-yt" class="bg-ac text-white px-8 py-3 rounded-xl font-bold shadow-xl hover:scale-[102%] transition-transform">Reproducir</button>
+                    </div>
+                    
+                    <div id="current-yt-display-container" class="hidden flex flex-col md:flex-row md:items-center justify-between bg-bg/50 p-3 rounded-xl border border-sec/50 gap-3">
+                        <p class="text-xs font-mono text-soft truncate flex-1">URL: <span id="current-yt-url-display" class="text-light"></span></p>
+                        <button id="btn-save-playlist" class="bg-sec text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-ac transition-colors whitespace-nowrap">Guardar Acceso Rápido</button>
+                    </div>
                 </div>
 
-                <div class="bg-bg/50 p-4 rounded-2xl text-soft text-sm mb-4">
-                    <strong>Nota:</strong> Al iniciar un video, puedes cambiar a las vistas de Reloj o Pomodoro y el reproductor se encogerá como un mini reproductor para no interrumpir tu música.
+                <!-- Listas Guardadas -->
+                <div class="mt-2">
+                    <h4 class="text-lg font-bold mb-3 text-light">Tus Playlists Guardadas</h4>
+                    <div id="saved-playlists-container" class="flex flex-wrap gap-2">
+                        <!-- Playlists inyectadas por JS -->
+                    </div>
                 </div>
 
-                <!-- Contenedor dinámico (Cambia a mini-player por CSS) -->
-                <div id="yt-player-container" class="w-full aspect-video bg-black rounded-3xl overflow-hidden relative hidden shadow-2xl transition-all duration-300">
+                <div class="bg-bg/50 p-4 rounded-2xl text-soft text-sm mt-2 border border-sec/30">
+                    <strong>Nota:</strong> Al iniciar la música, puedes cambiar a las vistas de Reloj o Pomodoro y el reproductor se encogerá como un mini reproductor flotante para no interrumpirte.
+                </div>
+
+                <!-- Reproductor Oculto / Mini -->
+                <div id="yt-player-container" class="w-full aspect-video bg-black rounded-3xl overflow-hidden relative hidden shadow-2xl transition-all duration-300 mt-4">
                     <button id="btn-close-yt" class="hidden absolute top-2 right-2 bg-bg/80 text-white rounded-full p-2 z-10 hover:bg-red-500 transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
@@ -243,7 +263,7 @@
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-bold text-soft mb-1 ml-2">Sonido Especial (URL YouTube)</label>
+                    <label class="block text-sm font-bold text-soft mb-1 ml-2">Sonido Especial (URL YouTube Music)</label>
                     <input type="text" id="item-yt-url" placeholder="Opcional. Pega un enlace..." class="w-full bg-bg border-none rounded-xl p-3 text-white text-sm focus:ring-2 focus:ring-ac outline-none transition-all">
                 </div>
 
@@ -265,7 +285,6 @@
         <h2 id="ring-time" class="text-6xl md:text-8xl font-black mb-2 drop-shadow-lg">00:00</h2>
         <p id="ring-label" class="text-2xl font-bold text-light mb-12 drop-shadow-md">Alarma</p>
         
-        <!-- Iframe Oculto para Sonido de YouTube -->
         <iframe id="alarm-audio-frame" class="hidden" allow="autoplay"></iframe>
 
         <div class="flex flex-col md:flex-row gap-4 w-full max-w-md">
