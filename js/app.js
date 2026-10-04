@@ -5,8 +5,7 @@ const state = {
     is24h: localStorage.getItem('studyfocus_is24h') !== 'false',
     daysMap: ['D', 'L', 'M', 'X', 'J', 'V', 'S'],
     lastRungMinute: null,
-    pipWindow: null,
-    currentView: 'home', // 'home' o 'calendar'
+    currentView: 'home', // 'home', 'pomodoro' o 'calendar'
     currentDate: new Date(),
     selectedDate: new Date()
 };
@@ -36,11 +35,14 @@ const ui = {
     // Navegación
     navHomeDesktop: document.getElementById('nav-home-desktop'),
     navCalDesktop: document.getElementById('nav-calendar-desktop'),
+    navPomDesktop: document.getElementById('nav-pomodoro-desktop'),
     navHomeMobile: document.getElementById('nav-home-mobile'),
     navCalMobile: document.getElementById('nav-calendar-mobile'),
+    navPomMobile: document.getElementById('nav-pomodoro-mobile'),
     btnFabMobile: document.getElementById('btn-fab-mobile'),
     viewHome: document.getElementById('view-home'),
     viewCalendar: document.getElementById('view-calendar'),
+    viewPomodoro: document.getElementById('view-pomodoro'),
 
     // Calendario
     calMonthYear: document.getElementById('cal-month-year'),
@@ -49,7 +51,18 @@ const ui = {
     btnCalNext: document.getElementById('cal-next'),
     selectedDateLabel: document.getElementById('selected-date-label'),
     dayRoutinesList: document.getElementById('day-routines-list'),
-    btnAddRoutine: document.getElementById('btn-add-routine')
+    btnAddRoutine: document.getElementById('btn-add-routine'),
+
+    // Pomodoro
+    btnPomWork: document.getElementById('pom-work'),
+    btnPomBreak: document.getElementById('pom-break'),
+    pomTimer: document.getElementById('pom-timer'),
+    btnPomToggle: document.getElementById('pom-toggle'),
+    btnPomReset: document.getElementById('pom-reset'),
+
+    // PWA & PiP
+    btnInstall: document.getElementById('btn-install'),
+    btnPip: document.getElementById('btn-pip')
 };
 
 // --- Utilidades ---
@@ -83,40 +96,91 @@ const loadData = async () => {
     }
 };
 
-// --- Navegación ---
-const switchView = (view) => {
-    state.currentView = view;
-    if (view === 'home') {
-        ui.viewCalendar.classList.add('hidden', 'opacity-0');
-        ui.viewHome.classList.remove('hidden');
-        setTimeout(() => ui.viewHome.classList.remove('opacity-0'), 50);
-        
-        ui.navHomeDesktop.classList.replace('text-soft', 'text-white');
-        ui.navHomeDesktop.classList.replace('hover:text-white', 'bg-ac');
-        ui.navCalDesktop.classList.replace('bg-ac', 'hover:text-white');
-        ui.navCalDesktop.classList.replace('text-white', 'text-soft');
-        
-        ui.navHomeMobile.classList.replace('text-soft', 'text-ac');
-        ui.navCalMobile.classList.replace('text-ac', 'text-soft');
-    } else {
-        ui.viewHome.classList.add('hidden', 'opacity-0');
-        ui.viewCalendar.classList.remove('hidden');
-        setTimeout(() => ui.viewCalendar.classList.remove('opacity-0'), 50);
-        
-        ui.navCalDesktop.classList.replace('text-soft', 'text-white');
-        ui.navCalDesktop.classList.replace('hover:text-white', 'bg-ac');
-        ui.navHomeDesktop.classList.replace('bg-ac', 'hover:text-white');
-        ui.navHomeDesktop.classList.replace('text-white', 'text-soft');
+// --- Instalación PWA ---
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    ui.btnInstall.classList.remove('hidden');
+    ui.btnInstall.classList.add('flex');
+});
 
-        ui.navCalMobile.classList.replace('text-soft', 'text-ac');
-        ui.navHomeMobile.classList.replace('text-ac', 'text-soft');
+ui.btnInstall.addEventListener('click', async () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+            ui.btnInstall.classList.add('hidden');
+            ui.btnInstall.classList.remove('flex');
+        }
+        deferredPrompt = null;
     }
+});
+
+// --- Modo PiP / Compacto (PWA Standalone) ---
+let isCompactWindow = false;
+
+const checkStandaloneMode = () => {
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+        ui.btnPip.classList.remove('hidden');
+        ui.btnPip.classList.add('flex');
+    } else {
+        ui.btnPip.classList.add('hidden');
+        ui.btnPip.classList.remove('flex');
+    }
+};
+checkStandaloneMode();
+window.matchMedia('(display-mode: standalone)').addEventListener('change', checkStandaloneMode);
+
+ui.btnPip.addEventListener('click', () => {
+    if (!isCompactWindow) {
+        window.resizeTo(350, 500); // Reducir tamaño
+        isCompactWindow = true;
+        showToast("Modo Compacto Activado");
+    } else {
+        window.resizeTo(screen.availWidth, screen.availHeight); // Restaurar
+        isCompactWindow = false;
+        showToast("Ventana Restaurada");
+    }
+});
+
+// --- Navegación ---
+const switchView = (targetView) => {
+    state.currentView = targetView;
+    const viewsMap = [
+        { id: 'home', view: ui.viewHome, navD: ui.navHomeDesktop, navM: ui.navHomeMobile },
+        { id: 'pomodoro', view: ui.viewPomodoro, navD: ui.navPomDesktop, navM: ui.navPomMobile },
+        { id: 'calendar', view: ui.viewCalendar, navD: ui.navCalDesktop, navM: ui.navCalMobile }
+    ];
+
+    viewsMap.forEach(v => {
+        if (v.id === targetView) {
+            v.view.classList.remove('hidden');
+            setTimeout(() => v.view.classList.remove('opacity-0'), 50);
+            
+            v.navD.classList.replace('text-soft', 'text-white');
+            v.navD.classList.remove('hover:text-white');
+            v.navD.classList.add('bg-ac');
+            
+            v.navM.classList.replace('text-soft', 'text-ac');
+        } else {
+            v.view.classList.add('hidden', 'opacity-0');
+            
+            v.navD.classList.replace('text-white', 'text-soft');
+            v.navD.classList.add('hover:text-white');
+            v.navD.classList.remove('bg-ac');
+            
+            v.navM.classList.replace('text-ac', 'text-soft');
+        }
+    });
 };
 
 ui.navHomeDesktop.addEventListener('click', () => switchView('home'));
 ui.navCalDesktop.addEventListener('click', () => switchView('calendar'));
+ui.navPomDesktop.addEventListener('click', () => switchView('pomodoro'));
 ui.navHomeMobile.addEventListener('click', () => switchView('home'));
 ui.navCalMobile.addEventListener('click', () => switchView('calendar'));
+ui.navPomMobile.addEventListener('click', () => switchView('pomodoro'));
 
 // --- Lógica del Reloj ---
 const updateClock = () => {
@@ -156,7 +220,6 @@ const checkAlarmsAndRoutines = (now) => {
 
     let alarmRung = false;
 
-    // 1. Revisar Alarmas recurrentes
     state.alarms.forEach(alarm => {
         if (alarm.active && alarm.time === currentMinStr) {
             if (alarm.days.length === 0 || alarm.days.includes(currentDay)) {
@@ -170,7 +233,6 @@ const checkAlarmsAndRoutines = (now) => {
         }
     });
 
-    // 2. Revisar Rutinas del calendario de HOY
     state.routines.forEach(routine => {
         if (!routine.completed && routine.date === currentDateStr && routine.time === currentMinStr) {
             triggerRingingModal({ ...routine, label: `Rutina: ${routine.label}` });
@@ -183,6 +245,74 @@ const checkAlarmsAndRoutines = (now) => {
         renderAlarms();
     }
 };
+
+// --- Lógica Técnica Pomodoro ---
+let pomInterval = null;
+let pomTimeLeft = 25 * 60;
+let isPomRunning = false;
+let pomMode = 'work'; 
+
+const updatePomodoroDisplay = () => {
+    const m = Math.floor(pomTimeLeft / 60);
+    const s = pomTimeLeft % 60;
+    ui.pomTimer.textContent = `${padZero(m)}:${padZero(s)}`;
+};
+
+const setPomodoroMode = (mode) => {
+    clearInterval(pomInterval);
+    isPomRunning = false;
+    ui.btnPomToggle.textContent = 'INICIAR';
+    pomMode = mode;
+    
+    if (mode === 'work') {
+        pomTimeLeft = 25 * 60;
+        ui.btnPomWork.classList.replace('text-soft', 'text-white');
+        ui.btnPomWork.classList.add('bg-ac');
+        ui.btnPomBreak.classList.replace('text-white', 'text-soft');
+        ui.btnPomBreak.classList.remove('bg-ac');
+    } else {
+        pomTimeLeft = 5 * 60;
+        ui.btnPomBreak.classList.replace('text-soft', 'text-white');
+        ui.btnPomBreak.classList.add('bg-ac');
+        ui.btnPomWork.classList.replace('text-white', 'text-soft');
+        ui.btnPomWork.classList.remove('bg-ac');
+    }
+    updatePomodoroDisplay();
+};
+
+ui.btnPomWork.addEventListener('click', () => setPomodoroMode('work'));
+ui.btnPomBreak.addEventListener('click', () => setPomodoroMode('break'));
+ui.btnPomReset.addEventListener('click', () => {
+    setPomodoroMode(pomMode);
+    showToast("Temporizador Reiniciado");
+});
+
+ui.btnPomToggle.addEventListener('click', () => {
+    if (isPomRunning) {
+        clearInterval(pomInterval);
+        isPomRunning = false;
+        ui.btnPomToggle.textContent = 'REANUDAR';
+    } else {
+        isPomRunning = true;
+        ui.btnPomToggle.textContent = 'PAUSAR';
+        pomInterval = setInterval(() => {
+            pomTimeLeft--;
+            updatePomodoroDisplay();
+            if (pomTimeLeft <= 0) {
+                clearInterval(pomInterval);
+                isPomRunning = false;
+                ui.btnPomToggle.textContent = 'INICIAR';
+                
+                triggerRingingModal({ 
+                    time: '00:00', 
+                    label: pomMode === 'work' ? '¡Tiempo de Descanso!' : '¡A Trabajar!' 
+                });
+                
+                setPomodoroMode(pomMode === 'work' ? 'break' : 'work');
+            }
+        }, 1000);
+    }
+});
 
 // --- Modales Genéricos (Alarmas y Rutinas) ---
 const openModal = (type = 'alarm', data = null) => {
@@ -197,7 +327,7 @@ const openModal = (type = 'alarm', data = null) => {
         generateDaysSelectors();
     } else {
         document.getElementById('modal-title').textContent = data ? 'Editar Actividad' : 'Nueva Actividad';
-        daysContainer.classList.add('hidden'); // Las rutinas de calendario no repiten, tienen fecha fija
+        daysContainer.classList.add('hidden');
         document.getElementById('routine-date').value = formatDateString(state.selectedDate);
     }
 
@@ -349,7 +479,6 @@ window.deleteAlarm = async (id) => {
     showToast("Alarma eliminada");
 };
 
-
 // --- Lógica del Calendario ---
 const renderCalendar = () => {
     ui.calGridDays.innerHTML = '';
@@ -362,21 +491,18 @@ const renderCalendar = () => {
     const firstDayIndex = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    // Rellenar espacios vacios antes del día 1
     for (let i = 0; i < firstDayIndex; i++) {
         const emptyDiv = document.createElement('div');
         emptyDiv.className = 'cal-day disabled';
         ui.calGridDays.appendChild(emptyDiv);
     }
 
-    // Días del mes
     for (let i = 1; i <= daysInMonth; i++) {
         const dateStr = formatDateString(new Date(year, month, i));
         const dayDiv = document.createElement('div');
         dayDiv.className = 'cal-day font-bold text-lg bg-bg/30 text-white';
         dayDiv.textContent = i;
 
-        // ¿Tiene rutinas este día?
         const dayRoutines = state.routines.filter(r => r.date === dateStr);
         if (dayRoutines.length > 0) {
             const dot = document.createElement('div');
@@ -384,14 +510,13 @@ const renderCalendar = () => {
             dayDiv.appendChild(dot);
         }
 
-        // Selección actual
         if (dateStr === formatDateString(state.selectedDate)) {
             dayDiv.classList.add('active');
         }
 
         dayDiv.addEventListener('click', () => {
             state.selectedDate = new Date(year, month, i);
-            renderCalendar(); // Re-render para mover clase 'active'
+            renderCalendar(); 
             updateSelectedDayView();
         });
 
@@ -434,7 +559,6 @@ const updateSelectedDayView = () => {
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                 </button>
             `;
-            // Clic para editar (excepto checkbox/basura)
             el.addEventListener('click', (e) => {
                 if(e.target.tagName !== 'INPUT' && !e.target.closest('button')) openModal('routine', routine);
             });
@@ -508,8 +632,8 @@ ui.btnSnooze.addEventListener('click', () => {
 document.getElementById('btn-add-desktop').addEventListener('click', () => openModal('alarm'));
 ui.gridAddCard.addEventListener('click', () => openModal('alarm'));
 ui.btnFabMobile.addEventListener('click', () => {
-    // FAB dinámico según la vista actual
-    if(state.currentView === 'home') openModal('alarm');
+    // Si estás en la vista Pomodoro y presionas FAB, lo usamos para abrir alarma rápida
+    if(state.currentView === 'home' || state.currentView === 'pomodoro') openModal('alarm');
     else openModal('routine');
 });
 ui.btnCloseModal.addEventListener('click', closeModal);
