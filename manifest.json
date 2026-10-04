@@ -1,0 +1,16 @@
+{
+  "name": "StudyFocus PWA",
+  "short_name": "StudyFocus",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1F2937",
+  "theme_color": "#1F2937",
+  "description": "Reloj, alarma y calendario personalizable para rutinas de estudio",
+  "icons": [
+    {
+      "src": "https://www.w3.org/Icons/WWW/w3c_home.png", 
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

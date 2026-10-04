@@ -1,0 +1,41 @@
+/* css/styles.css */
+/* Ocultar barra de desplazamiento para estética app nativa */
+::-webkit-scrollbar { display: none; }
+* { -ms-overflow-style: none; scrollbar-width: none; }
+
+.psychedelic-gradient {
+    background: linear-gradient(-45deg, #2D4B34, #5C8353, #1F2937, #86A789);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+}
+
+.glass-panel {
+    background: rgba(45, 75, 52, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Toggle switch checkbox oculto */
+.toggle-checkbox:checked { right: 0; border-color: #5C8353; }
+.toggle-checkbox:checked + .toggle-label { background-color: #5C8353; }
+
+/* Calendar specific */
+.cal-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+.cal-day:hover { background-color: rgba(92, 131, 83, 0.3); }
+.cal-day.active { background-color: #5C8353; color: white; border: 2px solid #86A789; }
+.cal-day.disabled { opacity: 0.3; pointer-events: none; }
+.dot-indicator {
+    width: 6px; height: 6px; background-color: #F4F6F0; border-radius: 50%;
+    position: absolute; bottom: 6px;
+}
