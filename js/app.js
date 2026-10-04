@@ -31,7 +31,7 @@ const ui = {
     modalPlaylist: document.getElementById('modal-playlist'), modalPlaylistContent: document.getElementById('modal-playlist-content'), btnClosePlaylistModal: document.getElementById('btn-close-playlist-modal'), playlistForm: document.getElementById('playlist-form'), playlistNameInput: document.getElementById('playlist-name-input'),
     
     // Controles Mini Reproductor
-    btnMinimizeYt: document.getElementById('btn-minimize-yt'), btnExpandYt: document.getElementById('btn-expand-yt'), ytCtrlPrev: document.getElementById('yt-ctrl-prev'), ytCtrlNext: document.getElementById('yt-ctrl-next'), ytCtrlPlayPause: document.getElementById('yt-ctrl-playpause')
+    btnMinimizeYt: document.getElementById('btn-minimize-yt'), btnExpandYt: document.getElementById('btn-expand-yt')
 };
 
 // --- Utilidades ---
@@ -74,7 +74,7 @@ const loadData = async () => {
 // --- Tema Claro / Oscuro ---
 let isLightMode = localStorage.getItem('studyfocus_theme') === 'light';
 const applyTheme = () => {
-    if(isLightMode) { document.documentElement.classList.add('light-theme'); ui.btnTheme.textContent = '☀️️'; } 
+    if(isLightMode) { document.documentElement.classList.add('light-theme'); ui.btnTheme.textContent = '☀'; } 
     else { document.documentElement.classList.remove('light-theme'); ui.btnTheme.textContent = '🌙'; }
 };
 applyTheme();
@@ -127,7 +127,7 @@ ui.btnPip.addEventListener('click', () => {
 });
 
 // --- Integración YouTube (Reproductor y Mini-Player Estático) ---
-let isYtPlaying = false, isYtPaused = false;
+let isYtPlaying = false;
 
 const ytCmd = (cmd) => {
     if(ui.ytIframe && ui.ytIframe.contentWindow) {
@@ -147,7 +147,7 @@ const playMedia = (url) => {
     if(embedUrl) {
         ui.ytIframe.src = embedUrl;
         ui.ytPlayerContainer.classList.remove('hidden');
-        isYtPlaying = true; isYtPaused = false;
+        isYtPlaying = true;
         ui.currentYtUrlDisplay.textContent = url;
         ui.currentYtDisplayContainer.classList.remove('hidden'); ui.currentYtDisplayContainer.classList.add('flex');
         showToast("Reproduciendo Medios");
@@ -164,12 +164,6 @@ ui.btnCloseYt.addEventListener('click', () => {
 
 ui.btnMinimizeYt.addEventListener('click', () => ui.ytPlayerContainer.classList.add('is-minimized'));
 ui.btnExpandYt.addEventListener('click', () => ui.ytPlayerContainer.classList.remove('is-minimized'));
-
-ui.ytCtrlPlayPause.addEventListener('click', () => {
-    isYtPaused = !isYtPaused; ytCmd(isYtPaused ? 'pauseVideo' : 'playVideo');
-});
-ui.ytCtrlPrev.addEventListener('click', () => ytCmd('previousVideo'));
-ui.ytCtrlNext.addEventListener('click', () => ytCmd('nextVideo'));
 
 // --- Filtros de Ánimo (YouTube Music) ---
 const moodPlaylists = {
