@@ -1,74 +1,65 @@
 /* css/styles.css */
+:root {
+    --color-bg: #1F2937;
+    --color-sec: #2D4B34;
+    --color-ac: #5C8353;
+    --color-light: #F4F6F0;
+    --color-soft: #86A789;
+    --color-tx: #FFFFFF;
+}
+
+/* Variables para el Tema Claro */
+.light-theme {
+    --color-bg: #F4F6F0;
+    --color-sec: #D5E0D5;
+    --color-ac: #4A6B42;
+    --color-light: #1F2937;
+    --color-soft: #5C8353;
+    --color-tx: #111827;
+}
+
 /* Ocultar barra de desplazamiento para estética app nativa */
 ::-webkit-scrollbar { display: none; }
 * { -ms-overflow-style: none; scrollbar-width: none; }
 
 .psychedelic-gradient {
-    background: linear-gradient(-45deg, #2D4B34, #5C8353, #1F2937, #86A789);
+    background: linear-gradient(-45deg, var(--color-sec), var(--color-ac), var(--color-bg), var(--color-soft));
     background-size: 400% 400%;
     animation: gradientBG 15s ease infinite;
 }
 
 .glass-panel {
-    background: rgba(45, 75, 52, 0.6);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(31, 41, 55, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.light-theme .glass-panel {
+    background: rgba(244, 246, 240, 0.7);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-/* Toggle switch checkbox oculto */
-.toggle-checkbox:checked { right: 0; border-color: #5C8353; }
-.toggle-checkbox:checked + .toggle-label { background-color: #5C8353; }
-
-/* Calendar specific */
-.cal-day {
-    aspect-ratio: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border-radius: 1rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-}
-.cal-day:hover { background-color: rgba(92, 131, 83, 0.3); }
-.cal-day.active { background-color: #5C8353; color: white; border: 2px solid #86A789; }
-.cal-day.disabled { opacity: 0.3; pointer-events: none; }
-.dot-indicator {
-    width: 6px; height: 6px; background-color: #F4F6F0; border-radius: 50%;
-    position: absolute; bottom: 6px;
-}
-
-/* Mini Player Mode (YouTube PiP Simulation) */
+/* Estilos del reproductor mini */
 .mini-player {
     position: fixed !important;
-    bottom: 95px !important; /* Arriba de la barra de navegación móvil */
-    right: 20px !important;
-    width: 280px !important;
-    height: 158px !important; /* Relación de aspecto 16:9 aprox */
-    z-index: 50;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-    border-radius: 1rem !important;
-    border: 2px solid #5C8353;
-    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    bottom: 90px;
+    right: 20px;
+    width: 250px !important;
+    aspect-ratio: 16/9;
+    z-index: 40;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
-/* Ajuste en escritorio */
 @media (min-width: 768px) {
-    .mini-player {
-        bottom: 30px !important;
-        right: 30px !important;
-        width: 350px !important;
-        height: 197px !important;
-    }
+    .mini-player { bottom: 20px; right: 20px; width: 350px !important; }
 }
 
-@keyframes popIn {
-    0% { transform: scale(0.8); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
+/* Estado Minimizado del Mini Player */
+.mini-player.is-minimized {
+    height: 70px !important;
+    aspect-ratio: auto !important;
+    border-radius: 2rem !important;
 }
-
-.mini-player #btn-close-yt {
-    display: block !important;
-}
+.is-minimized #yt-mini-controls { display: flex !important; }
+.is-minimized #yt-iframe-wrapper { display: none !important; }
+.mini-player #btn-minimize-yt { display: block !important; }
