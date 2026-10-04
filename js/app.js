@@ -25,7 +25,10 @@ const ui = {
     // YouTube Media
     ytMediaUrl: document.getElementById('yt-media-url'), btnLoadYt: document.getElementById('btn-load-yt'), ytPlayerContainer: document.getElementById('yt-player-container'), ytIframe: document.getElementById('yt-iframe'), btnCloseYt: document.getElementById('btn-close-yt'),
     pomYtUrl: document.getElementById('pom-yt-url'), alarmAudioFrame: document.getElementById('alarm-audio-frame'),
-    moodBtns: document.querySelectorAll('.mood-btn'), currentYtDisplayContainer: document.getElementById('current-yt-display-container'), currentYtUrlDisplay: document.getElementById('current-yt-url-display'), btnSavePlaylist: document.getElementById('btn-save-playlist'), savedPlaylistsContainer: document.getElementById('saved-playlists-container')
+    moodBtns: document.querySelectorAll('.mood-btn'), currentYtDisplayContainer: document.getElementById('current-yt-display-container'), currentYtUrlDisplay: document.getElementById('current-yt-url-display'), btnSavePlaylist: document.getElementById('btn-save-playlist'), savedPlaylistsContainer: document.getElementById('saved-playlists-container'),
+    
+    // Referencias nueva Modal Playlist
+    modalPlaylist: document.getElementById('modal-playlist'), modalPlaylistContent: document.getElementById('modal-playlist-content'), btnClosePlaylistModal: document.getElementById('btn-close-playlist-modal'), playlistForm: document.getElementById('playlist-form'), playlistNameInput: document.getElementById('playlist-name-input')
 };
 
 // --- Utilidades ---
@@ -43,13 +46,13 @@ const showToast = (msg) => {
     }, 3000);
 };
 
-// Nueva utilidad robusta que extrae el URL de incrustación ya sea de un Video o una Playlist completa
+// URL Integrando soporte a Youtube JS API para pausa remota
 const getEmbedUrl = (url) => {
     const playlistMatch = url.match(/[?&]list=([^&#]+)/);
-    if (playlistMatch) return `https://www.youtube.com/embed/videoseries?list=${playlistMatch[1]}&autoplay=1`;
+    if (playlistMatch) return `https://www.youtube.com/embed/videoseries?list=${playlistMatch[1]}&autoplay=1&enablejsapi=1`;
     
     const videoMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|music\?v=|.*[&?]v=))([^&]{11})/);
-    if (videoMatch) return `https://www.youtube.com/embed/${videoMatch[1]}?autoplay=1`;
+    if (videoMatch) return `https://www.youtube.com/embed/${videoMatch[1]}?autoplay=1&enablejsapi=1`;
     
     return null;
 };
@@ -71,13 +74,11 @@ const loadData = async () => {
     }
 };
 
-// --- Instalación PWA (Lógica Mejorada) ---
+// --- Instalación PWA y visibilidad rigurosa de contenedores ---
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    ui.installContainer.classList.remove('hidden');
-    ui.installContainer.classList.add('flex');
 });
 
 ui.btnInstall.addEventListener('click', async () => {
@@ -89,18 +90,30 @@ ui.btnInstall.addEventListener('click', async () => {
             ui.installContainer.classList.remove('flex');
         }
         deferredPrompt = null;
+    } else {
+        // En iOS u otros contextos donde no salte el prompt automático, advertir instrucción
+        showToast("En iOS: Selecciona 'Compartir' y 'Agregar a inicio'.");
     }
 });
 
 const checkStandaloneMode = () => {
-    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    if (isStandalone) {
+        // En la PWA instalada, se esconde la recomendación de instalación y se muestra PiP
         ui.installContainer.classList.add('hidden');
         ui.installContainer.classList.remove('flex');
         ui.btnPip.classList.remove('hidden');
         ui.btnPip.classList.add('flex');
+    } else {
+        // En el navegador normal, al contrario
+        ui.installContainer.classList.remove('hidden');
+        ui.installContainer.classList.add('flex');
+        ui.btnPip.classList.add('hidden');
+        ui.btnPip.classList.remove('flex');
     }
 };
 checkStandaloneMode();
+window.matchMedia('(display-mode: standalone)').addEventListener('change', checkStandaloneMode);
 
 // --- Modo PiP General ---
 let isCompactWindow = false;
@@ -109,17 +122,15 @@ ui.btnPip.addEventListener('click', () => {
     else { window.resizeTo(screen.availWidth, screen.availHeight); isCompactWindow = false; }
 });
 
-// --- Integración YouTube (Reproductor y Mini-Player) ---
+// --- Integración YouTube (Reproductor y Mini-Player Estático) ---
 let isYtPlaying = false;
 
 const updateMiniPlayerStatus = () => {
     if(isYtPlaying) {
         if(state.currentView !== 'youtube') {
             ui.ytPlayerContainer.classList.add('mini-player');
-            document.body.appendChild(ui.ytPlayerContainer);
         } else {
             ui.ytPlayerContainer.classList.remove('mini-player');
-            document.getElementById('yt-section').appendChild(ui.ytPlayerContainer);
         }
     }
 };
@@ -147,7 +158,6 @@ ui.btnCloseYt.addEventListener('click', () => {
     ui.ytIframe.src = "";
     ui.ytPlayerContainer.classList.add('hidden');
     ui.ytPlayerContainer.classList.remove('mini-player');
-    document.getElementById('yt-section').appendChild(ui.ytPlayerContainer);
     isYtPlaying = false;
     
     ui.currentYtDisplayContainer.classList.add('hidden');
@@ -178,6 +188,43 @@ ui.moodBtns.forEach(btn => {
     });
 });
 
+// --- Modal de Guardado (Playlists) Acorde al Diseño ---
+const openPlaylistModal = () => {
+    ui.playlistNameInput.value = '';
+    ui.modalPlaylist.classList.remove('opacity-0', 'pointer-events-none');
+    ui.modalPlaylistContent.classList.remove('translate-y-full', 'md:translate-y-8');
+};
+
+const closePlaylistModal = () => {
+    ui.modalPlaylistContent.classList.add('translate-y-full', 'md:translate-y-8');
+    setTimeout(() => ui.modalPlaylist.classList.add('opacity-0', 'pointer-events-none'), 300);
+};
+
+ui.btnSavePlaylist.addEventListener('click', () => {
+    if(ui.ytMediaUrl.value.trim() === '') {
+        showToast("Ingresa un enlace primero");
+        return;
+    }
+    openPlaylistModal();
+});
+
+ui.btnClosePlaylistModal.addEventListener('click', closePlaylistModal);
+ui.modalPlaylist.addEventListener('click', (e) => { if(e.target === ui.modalPlaylist) closePlaylistModal(); });
+
+ui.playlistForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const currentUrl = ui.ytMediaUrl.value;
+    const name = ui.playlistNameInput.value.trim();
+    if (name !== "") {
+        const newPlaylist = { id: generateId(), name: name, url: currentUrl };
+        state.playlists.push(newPlaylist);
+        await window.AppDB.savePlaylist(newPlaylist);
+        renderPlaylists();
+        showToast("Playlist guardada");
+        closePlaylistModal();
+    }
+});
+
 // --- Playlists Guardadas (Accesos Rápidos) ---
 const renderPlaylists = () => {
     ui.savedPlaylistsContainer.innerHTML = state.playlists.length === 0 ? '<p class="text-sm text-soft italic w-full">No hay playlists guardadas aún.</p>' : '';
@@ -193,18 +240,6 @@ const renderPlaylists = () => {
         ui.savedPlaylistsContainer.appendChild(el);
     });
 };
-
-ui.btnSavePlaylist.addEventListener('click', async () => {
-    const currentUrl = ui.ytMediaUrl.value;
-    const name = prompt("Nombre para identificar esta playlist (Ej. Mi Lo-fi favorito):");
-    if (name && name.trim() !== "") {
-        const newPlaylist = { id: generateId(), name: name.trim(), url: currentUrl };
-        state.playlists.push(newPlaylist);
-        await window.AppDB.savePlaylist(newPlaylist);
-        renderPlaylists();
-        showToast("Playlist guardada");
-    }
-});
 
 window.playSaved = (url) => {
     ui.ytMediaUrl.value = url;
@@ -485,6 +520,12 @@ const triggerRingingModal = (alarm) => {
         const embedUrl = getEmbedUrl(alarm.youtubeUrl);
         if (embedUrl) ui.alarmAudioFrame.src = embedUrl;
     }
+
+    // Detener la música de fondo temporalmente usando postMessage
+    if (isYtPlaying) {
+        try { ui.ytIframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*'); } catch(e) {}
+    }
+
     if ("vibrate" in navigator) navigator.vibrate([300, 100, 300, 100, 300]);
 };
 

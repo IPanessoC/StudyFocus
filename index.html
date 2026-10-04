@@ -55,7 +55,8 @@
                 </button>
             </nav>
 
-            <div id="install-container" class="hidden items-center gap-3">
+            <!-- Se remueve 'hidden' inicial para que siempre sea visible en navegador, la ocultación la manejará JS si es PWA -->
+            <div id="install-container" class="flex items-center gap-3">
                 <span class="text-xs font-semibold text-soft max-w-[140px] text-right leading-tight hidden lg:block">Se recomienda el uso directo desde su PWA</span>
                 <button id="btn-install" class="p-3 rounded-2xl bg-ac hover:bg-[#4a6b42] transition-colors shadow-xl text-white font-bold text-sm flex items-center gap-2" title="Instalar Aplicación">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
@@ -63,6 +64,7 @@
                 </button>
             </div>
 
+            <!-- Botón PiP, oculto por defecto, solo se muestra en modo PWA -->
             <button id="btn-pip" class="hidden p-3 rounded-2xl bg-sec hover:bg-ac transition-colors shadow-xl items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
             </button>
@@ -199,16 +201,17 @@
                 <div class="bg-bg/50 p-4 rounded-2xl text-soft text-sm mt-2 border border-sec/30">
                     <strong>Nota:</strong> Al iniciar la música, puedes cambiar a las vistas de Reloj o Pomodoro y el reproductor se encogerá como un mini reproductor flotante para no interrumpirte.
                 </div>
-
-                <!-- Reproductor Oculto / Mini -->
-                <div id="yt-player-container" class="w-full aspect-video bg-black rounded-3xl overflow-hidden relative hidden shadow-2xl transition-all duration-300 mt-4">
-                    <button id="btn-close-yt" class="hidden absolute top-2 right-2 bg-bg/80 text-white rounded-full p-2 z-10 hover:bg-red-500 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
-                    <iframe id="yt-iframe" class="w-full h-full" src="" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
-                </div>
             </section>
         </div>
+
+        <!-- Reproductor Oculto / Mini (Fuera de las vistas para mantener persistencia e ininterrupción de audio) -->
+        <div id="yt-player-container" class="w-full max-w-4xl mx-auto aspect-video bg-black rounded-3xl overflow-hidden relative hidden shadow-2xl transition-all duration-300 mt-4">
+            <button id="btn-close-yt" class="hidden absolute top-2 right-2 bg-bg/80 text-white rounded-full p-2 z-10 hover:bg-red-500 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+            <iframe id="yt-iframe" class="w-full h-full" src="" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+        </div>
+
     </main>
 
     <!-- Tab Bar (Móvil) -->
@@ -273,6 +276,25 @@
                 </div>
 
                 <button type="submit" class="w-full bg-ac text-white font-extrabold text-lg py-4 rounded-2xl shadow-xl hover:scale-[102%] transition-transform mt-2">Guardar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Guardar Playlist (Nuevo Componente) -->
+    <div id="modal-playlist" class="fixed inset-0 bg-bg/80 backdrop-blur-sm z-50 flex items-end md:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-sec w-full md:w-[450px] rounded-t-[2.5rem] md:rounded-[2.5rem] p-8 shadow-2xl transform translate-y-full md:translate-y-8 transition-transform duration-300" id="modal-playlist-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-extrabold text-white">Guardar Playlist</h3>
+                <button id="btn-close-playlist-modal" class="p-2 bg-bg rounded-full text-soft hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <form id="playlist-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-soft mb-1 ml-2">Nombre del Acceso Rápido</label>
+                    <input type="text" id="playlist-name-input" placeholder="Ej. Lo-Fi Study Focus..." required class="w-full bg-bg border-none rounded-xl p-4 text-white font-medium focus:ring-2 focus:ring-ac outline-none transition-all shadow-inner">
+                </div>
+                <button type="submit" class="w-full bg-ac text-white font-extrabold text-lg py-4 rounded-2xl shadow-xl hover:scale-[102%] transition-transform mt-2">Guardar Acceso Rápido</button>
             </form>
         </div>
     </div>
