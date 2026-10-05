@@ -9,7 +9,6 @@
     <title>StudyFocus PWA</title>
     
     <link rel="manifest" href="manifest.json">
-    <!-- Ícono SVG para la pestaña (Acompaña al título) -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none' viewBox='0 0 24 24' stroke='%235C8353' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z' /%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,7 +16,6 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // Uso de Variables CSS para el Tema Dinámico
         tailwind.config = {
             darkMode: 'class',
             theme: {
@@ -144,13 +142,19 @@
                         <div id="calendar-grid-days" class="grid grid-cols-7 gap-2"></div>
                     </div>
 
-                    <div class="bg-sec p-6 rounded-[2.5rem] shadow-xl flex flex-col h-[500px]">
+                    <div class="bg-sec p-6 rounded-[2.5rem] shadow-xl flex flex-col h-[550px]">
                         <h4 class="text-xl font-bold mb-1">Actividades</h4>
                         <p id="selected-date-label" class="text-soft text-sm font-medium mb-6">Selecciona un día</p>
                         <div id="day-routines-list" class="flex-1 overflow-y-auto space-y-3 pr-2 scroll-smooth"></div>
-                        <button id="btn-add-routine" class="mt-4 w-full bg-ac text-white font-extrabold py-4 rounded-2xl shadow-xl hover:scale-[102%] transition-transform flex justify-center items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg> Agregar Actividad
-                        </button>
+                        
+                        <div class="flex gap-2 w-full mt-4">
+                            <button id="btn-add-routine" class="flex-1 bg-ac text-white font-extrabold py-3 rounded-2xl shadow-xl hover:scale-[102%] transition-transform flex justify-center items-center gap-1 text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg> Individual
+                            </button>
+                            <button id="btn-schedule-day" class="flex-1 bg-sec border border-soft text-white font-extrabold py-3 rounded-2xl shadow-xl hover:bg-ac hover:border-transparent transition-all flex justify-center items-center gap-1 text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg> Programar Día
+                            </button>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -240,7 +244,7 @@
         </div>
     </nav>
 
-    <!-- Modal Form (Alarma/Rutina) -->
+    <!-- Modal Form (Alarma/Rutina individual) -->
     <div id="modal-form" class="fixed inset-0 bg-bg/80 backdrop-blur-sm z-50 flex items-end md:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="bg-sec w-full md:w-[450px] rounded-t-[2.5rem] md:rounded-[2.5rem] p-8 shadow-2xl transform translate-y-full md:translate-y-8 transition-transform duration-300" id="modal-form-content">
             <div class="flex justify-between items-center mb-6">
@@ -264,6 +268,18 @@
                     <input type="text" id="item-label" placeholder="Ej. Bloque de Estudio..." required class="w-full bg-bg border-none rounded-xl p-3 text-white font-medium focus:ring-2 focus:ring-ac outline-none transition-all">
                 </div>
                 
+                <!-- Campos Exclusivos de Rutina (Ocultos por defecto para alarma) -->
+                <div id="routine-extras" class="hidden space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold text-soft mb-1 ml-2">Hora esperada de finalización</label>
+                        <input type="time" id="item-end-time" class="w-full bg-bg border-none rounded-xl p-3 text-white text-sm focus:ring-2 focus:ring-ac outline-none transition-all [&::-webkit-calendar-picker-indicator]:hidden">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-soft mb-1 ml-2">Descripción de la actividad</label>
+                        <textarea id="item-description" rows="2" placeholder="Detalles o notas importantes..." class="w-full bg-bg border-none rounded-xl p-3 text-white text-sm focus:ring-2 focus:ring-ac outline-none transition-all"></textarea>
+                    </div>
+                </div>
+
                 <div>
                     <label class="block text-sm font-bold text-soft mb-1 ml-2">Sonido Especial (URL YouTube Music)</label>
                     <input type="text" id="item-yt-url" placeholder="Opcional. Pega un enlace..." class="w-full bg-bg border-none rounded-xl p-3 text-white text-sm focus:ring-2 focus:ring-ac outline-none transition-all">
@@ -275,6 +291,39 @@
                 </div>
 
                 <button type="submit" class="w-full bg-ac text-white font-extrabold text-lg py-4 rounded-2xl shadow-xl hover:scale-[102%] transition-transform mt-2">Guardar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Form (Programar Día Completo) -->
+    <div id="modal-schedule-day" class="fixed inset-0 bg-bg/80 backdrop-blur-sm z-50 flex items-end md:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-sec w-full md:w-[600px] rounded-t-[2.5rem] md:rounded-[2.5rem] p-6 shadow-2xl transform translate-y-full md:translate-y-8 transition-transform duration-300 max-h-[90vh] flex flex-col" id="modal-schedule-day-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-extrabold">Planificar Jornada</h3>
+                <button id="btn-close-schedule-modal" class="p-2 bg-bg rounded-full text-soft hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            
+            <form id="schedule-day-form" class="space-y-4 flex-1 flex flex-col overflow-hidden">
+                <div class="shrink-0 flex items-center justify-between bg-bg rounded-xl p-4 shadow-inner">
+                    <label class="text-sm font-bold text-soft">¿A qué hora inicia tu día?</label>
+                    <input type="time" id="schedule-start-time" value="08:00" required class="bg-transparent text-xl font-black text-right text-white outline-none w-32 appearance-none [&::-webkit-calendar-picker-indicator]:hidden">
+                </div>
+
+                <!-- Contenedor dinámico de actividades -->
+                <div id="schedule-activities-container" class="flex-1 overflow-y-auto space-y-3 pr-2 scroll-smooth border-y border-sec/50 py-2">
+                    <!-- Las filas se insertan aquí vía JS -->
+                </div>
+
+                <div class="shrink-0 space-y-3 pt-2">
+                    <button type="button" id="btn-add-schedule-row" class="w-full bg-bg border border-dashed border-soft text-soft font-bold py-3 rounded-xl hover:bg-bg/50 transition-colors">
+                        + Añadir otra actividad a la lista
+                    </button>
+                    <button type="submit" class="w-full bg-ac text-white font-extrabold text-lg py-4 rounded-2xl shadow-xl hover:scale-[102%] transition-transform">
+                        Generar Agenda Inteligente
+                    </button>
+                </div>
             </form>
         </div>
     </div>
