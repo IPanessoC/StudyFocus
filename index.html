@@ -79,7 +79,22 @@
                 <div class="absolute inset-0 bg-sec opacity-20 blur-[100px] rounded-full"></div>
                 <h2 id="jumbo-clock" class="text-7xl md:text-[9rem] font-black tracking-tighter tabular-nums drop-shadow-2xl z-10 transition-all">--:--</h2>
                 <p id="jumbo-date" class="text-soft text-lg md:text-2xl font-medium mt-4 tracking-wide uppercase z-10">Cargando fecha...</p>
+                
+                <!-- NEW: Actividad Actual / Próxima -->
+                <div id="current-activity-container" class="mt-8 bg-sec/40 p-4 rounded-3xl border border-sec shadow-lg flex items-center justify-between max-w-md mx-auto w-full z-10 transition-all duration-300 hidden">
+                    <div class="flex items-center gap-4">
+                        <div id="activity-icon" class="w-12 h-12 rounded-full bg-ac flex items-center justify-center text-white shadow-md shrink-0">
+                            <!-- SVG insertado vía JS según categoría -->
+                        </div>
+                        <div>
+                            <p class="text-xs text-soft font-bold uppercase tracking-wider" id="activity-status-label">Próxima Actividad</p>
+                            <h4 class="text-lg font-bold text-white leading-tight truncate max-w-[200px]" id="activity-title">--</h4>
+                            <p class="text-sm text-light font-mono mt-1" id="activity-time">--:--</p>
+                        </div>
+                    </div>
+                </div>
             </section>
+            
             <section>
                 <div class="flex justify-between items-end mb-6">
                     <h3 class="text-3xl font-bold">Tus Alarmas</h3>
@@ -155,6 +170,9 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg> Programar Día
                             </button>
                         </div>
+                        <button id="btn-open-gcal-modal" class="w-full mt-3 bg-[#4285F4] hover:bg-[#3367D6] text-white font-extrabold py-3 rounded-2xl shadow-xl hover:scale-[102%] transition-all flex justify-center items-center gap-2 text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M19 4h-2V2h-2v2H9V2H7v2H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/><path d="M7 12h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"/></svg> Exportar a GCalendar
+                        </button>
                     </div>
                 </div>
             </section>
@@ -202,8 +220,13 @@
         <div id="yt-player-container" class="w-full max-w-4xl mx-auto aspect-video bg-black rounded-3xl overflow-hidden relative hidden shadow-2xl transition-all duration-300 mt-4 flex-col">
             
             <!-- Controles Minimizado (Botones) -->
-            <div id="yt-mini-controls" class="hidden w-full h-full bg-sec items-center justify-center gap-4 px-4 shadow-inner">
-                <button id="btn-expand-yt" class="ml-4 text-soft p-2 hover:text-white transition-colors" title="Expandir Mini Player"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg></button>
+            <div id="yt-mini-controls" class="hidden w-full h-full bg-sec items-center justify-between px-6 shadow-inner">
+                <span class="text-white font-bold text-sm truncate">Reproductor en curso...</span>
+                <div class="flex gap-2">
+                    <button id="btn-expand-yt" class="text-soft p-2 bg-bg/50 rounded-full hover:text-white transition-colors" title="Expandir Mini Player"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg></button>
+                    <!-- NEW: Botón cerrar mini player -->
+                    <button id="btn-close-mini-yt" class="text-red-400 p-2 bg-bg/50 rounded-full hover:bg-red-500 hover:text-white transition-colors" title="Cerrar"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
+                </div>
             </div>
 
             <!-- Iframe y Controles Overlays -->
@@ -211,7 +234,8 @@
                 <button id="btn-minimize-yt" class="hidden absolute top-2 left-2 bg-bg/80 text-white rounded-full p-2 z-10 hover:bg-ac transition-colors shadow-lg" title="Minimizar">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
                 </button>
-                <button id="btn-close-yt" class="hidden absolute top-2 right-2 bg-bg/80 text-white rounded-full p-2 z-10 hover:bg-red-500 transition-colors">
+                <!-- UPDATE: Botón visible sin clase hidden -->
+                <button id="btn-close-yt" class="flex items-center justify-center absolute top-2 right-2 bg-bg/80 text-white rounded-full p-2 z-10 hover:bg-red-500 transition-colors" title="Cerrar reproductor">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
                 <iframe id="yt-iframe" class="w-full h-full" src="" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
@@ -244,7 +268,7 @@
         </div>
     </nav>
 
-    <!-- Modal Form (Alarma/Rutina individual) -->
+    <!-- Modales (Alarma, Playlist, GCalendar, Ringing) -->
     <div id="modal-form" class="fixed inset-0 bg-bg/80 backdrop-blur-sm z-50 flex items-end md:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="bg-sec w-full md:w-[450px] rounded-t-[2.5rem] md:rounded-[2.5rem] p-8 shadow-2xl transform translate-y-full md:translate-y-8 transition-transform duration-300" id="modal-form-content">
             <div class="flex justify-between items-center mb-6">
@@ -268,7 +292,6 @@
                     <input type="text" id="item-label" placeholder="Ej. Bloque de Estudio..." required class="w-full bg-bg border-none rounded-xl p-3 text-white font-medium focus:ring-2 focus:ring-ac outline-none transition-all">
                 </div>
                 
-                <!-- Campos Exclusivos de Rutina (Ocultos por defecto para alarma) -->
                 <div id="routine-extras" class="hidden space-y-4">
                     <div>
                         <label class="block text-sm font-bold text-soft mb-1 ml-2">Hora esperada de finalización</label>
@@ -295,7 +318,6 @@
         </div>
     </div>
 
-    <!-- Modal Form (Programar Día Completo) -->
     <div id="modal-schedule-day" class="fixed inset-0 bg-bg/80 backdrop-blur-sm z-50 flex items-end md:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="bg-sec w-full md:w-[600px] rounded-t-[2.5rem] md:rounded-[2.5rem] p-6 shadow-2xl transform translate-y-full md:translate-y-8 transition-transform duration-300 max-h-[90vh] flex flex-col" id="modal-schedule-day-content">
             <div class="flex justify-between items-center mb-4">
@@ -311,9 +333,7 @@
                     <input type="time" id="schedule-start-time" value="08:00" required class="bg-transparent text-xl font-black text-right text-white outline-none w-32 appearance-none [&::-webkit-calendar-picker-indicator]:hidden">
                 </div>
 
-                <!-- Contenedor dinámico de actividades -->
                 <div id="schedule-activities-container" class="flex-1 overflow-y-auto space-y-3 pr-2 scroll-smooth border-y border-sec/50 py-2">
-                    <!-- Las filas se insertan aquí vía JS -->
                 </div>
 
                 <div class="shrink-0 space-y-3 pt-2">
@@ -328,7 +348,26 @@
         </div>
     </div>
 
-    <!-- Modal Playlist -->
+    <!-- NEW: Modal Exportar a Google Calendar -->
+    <div id="modal-gcal" class="fixed inset-0 bg-bg/80 backdrop-blur-sm z-50 flex items-end md:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-sec w-full md:w-[450px] rounded-t-[2.5rem] md:rounded-[2.5rem] p-8 shadow-2xl transform translate-y-full md:translate-y-8 transition-transform duration-300" id="modal-gcal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-extrabold text-white">Sincronizar GCalendar</h3>
+                <button id="btn-close-gcal" class="p-2 bg-bg rounded-full text-soft hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <form id="gcal-form" class="space-y-4">
+                <p class="text-sm text-light mb-4">Ingresa tu correo para exportar y sincronizar tus rutinas (activa alarmas en tu celular vía Calendar, aún con la App cerrada).</p>
+                <div>
+                    <label class="block text-sm font-bold text-soft mb-1 ml-2">Correo de Google</label>
+                    <input type="email" id="gcal-email" placeholder="ejemplo@gmail.com" required class="w-full bg-bg border-none rounded-xl p-4 text-white font-medium focus:ring-2 focus:ring-[#4285F4] outline-none transition-all shadow-inner">
+                </div>
+                <button type="submit" class="w-full bg-[#4285F4] text-white font-extrabold text-lg py-4 rounded-2xl shadow-xl hover:scale-[102%] transition-transform mt-2">Exportar Datos y Alarmas</button>
+            </form>
+        </div>
+    </div>
+
     <div id="modal-playlist" class="fixed inset-0 bg-bg/80 backdrop-blur-sm z-50 flex items-end md:items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="bg-sec w-full md:w-[450px] rounded-t-[2.5rem] md:rounded-[2.5rem] p-8 shadow-2xl transform translate-y-full md:translate-y-8 transition-transform duration-300" id="modal-playlist-content">
             <div class="flex justify-between items-center mb-6">
@@ -347,7 +386,6 @@
         </div>
     </div>
 
-    <!-- Modal: Alarma Sonando -->
     <div id="modal-ringing" class="fixed inset-0 z-[100] hidden flex-col items-center justify-center text-center p-6 psychedelic-gradient">
         <div class="animate-ring w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mb-8 backdrop-blur-md shadow-2xl">
             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="text-white"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
@@ -363,7 +401,6 @@
         </div>
     </div>
 
-    <!-- Toast -->
     <div id="toast" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-ac text-white px-6 py-3 rounded-full font-bold shadow-2xl transition-all duration-300 opacity-0 pointer-events-none z-[60] translate-y-[-20px]">
         Mensaje
     </div>

@@ -9,16 +9,31 @@ const state = {
     selectedDate: new Date()
 };
 
+// Diccionario de Iconos SVG para Categorías
+const catIcons = {
+    trabajo: `<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>`,
+    estudio: `<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 14v7" /></svg>`,
+    relajacion: `<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>`,
+    ejercicio: `<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>`,
+    hobbies: `<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`,
+    repetitiva: `<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>`,
+    default: `<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`
+};
+
 // --- Referencias DOM ---
 const ui = {
     jumboClock: document.getElementById('jumbo-clock'), jumboDate: document.getElementById('jumbo-date'),
     btnFormat: document.getElementById('btn-format'), btnTheme: document.getElementById('btn-theme'),
     grid: document.getElementById('alarms-grid'), gridAddCard: document.getElementById('grid-add-card'),
     modalForm: document.getElementById('modal-form'), modalContent: document.getElementById('modal-form-content'), btnCloseModal: document.getElementById('btn-close-modal'), genericForm: document.getElementById('generic-form'),
-    routineExtras: document.getElementById('routine-extras'), itemEndTime: document.getElementById('item-end-time'), itemDescription: document.getElementById('item-description'),
+    routineExtras: document.getElementById('routine-extras'), itemEndTime: document.getElementById('item-end-time'), itemDescription: document.getElementById('item-description'), itemCategory: document.getElementById('item-category'),
     
-    // Novedad: Planificar Día
+    // Novedad: Planificar Día y Exportación
     btnScheduleDay: document.getElementById('btn-schedule-day'), modalScheduleDay: document.getElementById('modal-schedule-day'), modalScheduleDayContent: document.getElementById('modal-schedule-day-content'), btnCloseScheduleModal: document.getElementById('btn-close-schedule-modal'), scheduleDayForm: document.getElementById('schedule-day-form'), scheduleActivitiesContainer: document.getElementById('schedule-activities-container'), btnAddScheduleRow: document.getElementById('btn-add-schedule-row'),
+    gcalEmail: document.getElementById('gcal-email'), btnExportGcal: document.getElementById('btn-export-gcal'),
+    
+    // Novedad: Visualización Actividad Actual
+    currentActivityBanner: document.getElementById('current-activity-banner'), currentActivityIcon: document.getElementById('current-activity-icon'), currentActivityStatus: document.getElementById('current-activity-status'), currentActivityName: document.getElementById('current-activity-name'), currentActivityTime: document.getElementById('current-activity-time'),
     
     modalRinging: document.getElementById('modal-ringing'), ringTime: document.getElementById('ring-time'), ringLabel: document.getElementById('ring-label'), btnSnooze: document.getElementById('btn-snooze'), btnStop: document.getElementById('btn-stop'),
     toast: document.getElementById('toast'), navHomeDesktop: document.getElementById('nav-home-desktop'), navCalDesktop: document.getElementById('nav-calendar-desktop'), navPomDesktop: document.getElementById('nav-pomodoro-desktop'), navYtDesktop: document.getElementById('nav-youtube-desktop'),
@@ -33,7 +48,7 @@ const ui = {
     moodBtns: document.querySelectorAll('.mood-btn'), currentYtDisplayContainer: document.getElementById('current-yt-display-container'), currentYtUrlDisplay: document.getElementById('current-yt-url-display'), btnSavePlaylist: document.getElementById('btn-save-playlist'), savedPlaylistsContainer: document.getElementById('saved-playlists-container'),
     
     modalPlaylist: document.getElementById('modal-playlist'), modalPlaylistContent: document.getElementById('modal-playlist-content'), btnClosePlaylistModal: document.getElementById('btn-close-playlist-modal'), playlistForm: document.getElementById('playlist-form'), playlistNameInput: document.getElementById('playlist-name-input'),
-    btnMinimizeYt: document.getElementById('btn-minimize-yt'), btnExpandYt: document.getElementById('btn-expand-yt')
+    btnMinimizeYt: document.getElementById('btn-minimize-yt'), btnExpandYt: document.getElementById('btn-expand-yt'), btnCloseMiniYt: document.getElementById('btn-close-mini-yt')
 };
 
 // --- Utilidades ---
@@ -64,9 +79,9 @@ const showToast = (msg) => {
 
 const getEmbedUrl = (url) => {
     const playlistMatch = url.match(/[?&]list=([^&#]+)/);
-    if (playlistMatch) return `https://www.youtube.com/embed/videoseries?list=${playlistMatch[1]}&autoplay=1&enablejsapi=1`;
+    if (playlistMatch) return `[https://www.youtube.com/embed/videoseries?list=$](https://www.youtube.com/embed/videoseries?list=$){playlistMatch[1]}&autoplay=1&enablejsapi=1`;
     const videoMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|music\?v=|.*[&?]v=))([^&]{11})/);
-    if (videoMatch) return `https://www.youtube.com/embed/${videoMatch[1]}?autoplay=1&enablejsapi=1`;
+    if (videoMatch) return `[https://www.youtube.com/embed/$](https://www.youtube.com/embed/$){videoMatch[1]}?autoplay=1&enablejsapi=1`;
     return null;
 };
 
@@ -146,6 +161,7 @@ ui.btnLoadYt.addEventListener('click', () => playMedia(ui.ytMediaUrl.value));
 ui.btnCloseYt.addEventListener('click', () => { ui.ytIframe.src = ""; ui.ytPlayerContainer.classList.add('hidden'); ui.ytPlayerContainer.classList.remove('mini-player', 'is-minimized'); isYtPlaying = false; ui.currentYtDisplayContainer.classList.add('hidden'); });
 ui.btnMinimizeYt.addEventListener('click', () => ui.ytPlayerContainer.classList.add('is-minimized'));
 ui.btnExpandYt.addEventListener('click', () => ui.ytPlayerContainer.classList.remove('is-minimized'));
+ui.btnCloseMiniYt.addEventListener('click', () => ui.btnCloseYt.click());
 
 const moodPlaylists = {
     relax: ['PLMC9KNkIncKtPzgY-5rmhvj7fax8fdxoj', 'PLofht4dAwjwM4tS8G-G2T_s4h7iYd1A1u', 'PLzYd4T86KGE_R63Giyf5hUq8pU9QO_G-E'],
@@ -157,7 +173,7 @@ ui.moodBtns.forEach(btn => {
         ui.moodBtns.forEach(b => { b.classList.remove('bg-ac', 'text-white'); b.classList.add('bg-sec', 'text-soft'); });
         btn.classList.remove('bg-sec', 'text-soft'); btn.classList.add('bg-ac', 'text-white');
         const list = moodPlaylists[btn.dataset.mood];
-        const url = `https://music.youtube.com/playlist?list=${list[Math.floor(Math.random() * list.length)]}`;
+        const url = `[https://music.youtube.com/playlist?list=$](https://music.youtube.com/playlist?list=$){list[Math.floor(Math.random() * list.length)]}`;
         ui.ytMediaUrl.value = url; playMedia(url);
     });
 });
@@ -180,7 +196,7 @@ const renderPlaylists = () => {
     ui.savedPlaylistsContainer.innerHTML = state.playlists.length === 0 ? '<p class="text-sm text-soft italic w-full">No hay playlists guardadas aún.</p>' : '';
     state.playlists.forEach(p => {
         const el = document.createElement('div'); el.className = 'flex items-center gap-2 bg-sec/80 border border-sec px-4 py-2 rounded-xl group cursor-pointer hover:bg-ac transition-colors shadow-sm';
-        el.innerHTML = `<span class="text-white font-semibold text-sm truncate max-w-[150px] md:max-w-[200px]" onclick="playSaved('${p.url}')">${p.name}</span><button class="text-red-400 hover:text-red-200 ml-1 p-1 opacity-60 hover:opacity-100 transition-opacity" onclick="deletePlaylist('${p.id}')"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>`;
+        el.innerHTML = `<span class="text-white font-semibold text-sm truncate max-w-[150px] md:max-w-[200px]" onclick="playSaved('${p.url}')">${p.name}</span><button class="text-red-400 hover:text-red-200 ml-1 p-1 opacity-60 hover:opacity-100 transition-opacity" onclick="deletePlaylist('${p.id}')"><svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>`;
         ui.savedPlaylistsContainer.appendChild(el);
     });
 };
@@ -208,13 +224,63 @@ const switchView = (targetView) => {
 [ui.navPomDesktop, ui.navPomMobile].forEach(btn => btn.addEventListener('click', () => switchView('pomodoro')));
 [ui.navYtDesktop, ui.navYtMobile].forEach(btn => btn.addEventListener('click', () => switchView('youtube')));
 
+// Actualiza visualmente el bloque de próxima actividad en Home
+const updateCurrentActivityDisplay = (now) => {
+    const dateStr = formatDateString(now);
+    const currentMins = now.getHours() * 60 + now.getMinutes();
+    const todayRoutines = state.routines.filter(r => r.date === dateStr && !r.completed).sort((a,b) => timeToMins(a.time) - timeToMins(b.time));
+    
+    let activeOrNext = null;
+    let isCurrent = false;
+
+    for (let r of todayRoutines) {
+        const startMins = timeToMins(r.time);
+        const endMins = r.endTime ? timeToMins(r.endTime) : startMins + 30;
+        
+        if (currentMins >= startMins && currentMins < endMins) {
+            activeOrNext = r;
+            isCurrent = true;
+            break;
+        }
+        if (startMins > currentMins) {
+            activeOrNext = r;
+            isCurrent = false;
+            break;
+        }
+    }
+
+    if (activeOrNext) {
+        ui.currentActivityBanner.classList.remove('hidden');
+        ui.currentActivityBanner.classList.add('flex');
+        ui.currentActivityStatus.textContent = isCurrent ? 'Actividad Actual' : 'Próxima Actividad';
+        ui.currentActivityName.textContent = activeOrNext.label;
+        
+        let timeLabel = activeOrNext.time;
+        if (!state.is24h) {
+            let [h, m] = activeOrNext.time.split(':');
+            let ampm = parseInt(h) >= 12 ? 'PM' : 'AM';
+            timeLabel = `${parseInt(h)%12 || 12}:${m} ${ampm}`;
+        }
+        ui.currentActivityTime.innerHTML = `<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> ${timeLabel} ${activeOrNext.endTime ? '- ' + activeOrNext.endTime : ''}`;
+        
+        const iconKey = activeOrNext.category || 'default';
+        ui.currentActivityIcon.innerHTML = catIcons[iconKey] || catIcons['default'];
+    } else {
+        ui.currentActivityBanner.classList.add('hidden');
+        ui.currentActivityBanner.classList.remove('flex');
+    }
+};
+
 const updateClock = () => {
     const now = new Date(); let hours = now.getHours(); const minutes = padZero(now.getMinutes());
     if (!state.is24h) { const ampm = hours >= 12 ? ' PM' : ' AM'; hours = hours % 12 || 12; ui.jumboClock.innerHTML = `${hours}:${minutes}<span class="text-3xl text-soft ml-2">${ampm}</span>`; } 
     else ui.jumboClock.textContent = `${padZero(hours)}:${minutes}`;
     ui.jumboDate.textContent = now.toLocaleDateString('es-ES', { weekday: 'long', month: 'long', day: 'numeric' });
+    
     checkAlarmsAndRoutines(now);
+    updateCurrentActivityDisplay(now);
 };
+
 ui.btnFormat.addEventListener('click', () => { state.is24h = !state.is24h; localStorage.setItem('studyfocus_is24h', state.is24h); ui.btnFormat.textContent = state.is24h ? '24h' : '12h'; updateClock(); renderAlarms(); });
 ui.btnFormat.textContent = state.is24h ? '24h' : '12h';
 
@@ -222,9 +288,38 @@ const checkAlarmsAndRoutines = (now) => {
     const currentMinStr = `${padZero(now.getHours())}:${padZero(now.getMinutes())}`;
     const currentDay = now.getDay(); const currentDateStr = formatDateString(now);
     if (state.lastRungMinute === currentMinStr) return;
+    
     let alarmRung = false;
-    state.alarms.forEach(alarm => { if (alarm.active && alarm.time === currentMinStr && (alarm.days.length === 0 || alarm.days.includes(currentDay))) { triggerRingingModal(alarm); alarmRung = true; if(alarm.days.length === 0) { alarm.active = false; window.AppDB.saveAlarm(alarm); } } });
-    state.routines.forEach(routine => { if (!routine.completed && routine.date === currentDateStr && routine.time === currentMinStr) { triggerRingingModal({ ...routine, label: `Actividad: ${routine.label}` }); alarmRung = true; } });
+    
+    state.alarms.forEach(alarm => { 
+        if (!alarm.active || alarm.time !== currentMinStr) return;
+        
+        // Prevención: Si la alarma tiene fecha explícita, evalúa la fecha (Para rutinas auto-generadas)
+        if (alarm.date && alarm.date !== currentDateStr) return;
+        // Check semanal si no tiene fecha exacta
+        if (!alarm.date && alarm.days && alarm.days.length > 0 && !alarm.days.includes(currentDay)) return;
+
+        triggerRingingModal(alarm); 
+        alarmRung = true; 
+        
+        // Auto apagado para las que son de una sola vez o de un solo día
+        if(alarm.date || (alarm.days && alarm.days.length === 0)) { 
+            alarm.active = false; 
+            window.AppDB.saveAlarm(alarm); 
+        } 
+    });
+    
+    // Las rutinas ya no evalúan si deben sonar directamente acá si generaron alarmas (evitar doble sonido), 
+    // pero mantenemos la lógica residual por seguridad para las antiguas sin alarma enlazada.
+    state.routines.forEach(routine => { 
+        const hasLinkedAlarm = state.alarms.some(a => a.time === routine.time && a.date === routine.date && a.label.includes(routine.label));
+        
+        if (!hasLinkedAlarm && !routine.completed && routine.date === currentDateStr && routine.time === currentMinStr) { 
+            triggerRingingModal({ ...routine, label: `Actividad: ${routine.label}` }); 
+            alarmRung = true; 
+        } 
+    });
+    
     if (alarmRung) { state.lastRungMinute = currentMinStr; renderAlarms(); }
 };
 
@@ -259,7 +354,7 @@ ui.btnPomToggle.addEventListener('click', () => {
 const openModal = (type = 'alarm', data = null) => {
     ui.genericForm.reset(); document.getElementById('item-type').value = type;
     document.getElementById('days-container').classList.toggle('hidden', type !== 'alarm');
-    ui.routineExtras.classList.toggle('hidden', type === 'alarm'); // Visibilidad condicional
+    ui.routineExtras.classList.toggle('hidden', type === 'alarm');
     
     if (type === 'alarm') generateDaysSelectors(); 
     else document.getElementById('routine-date').value = formatDateString(state.selectedDate);
@@ -268,7 +363,11 @@ const openModal = (type = 'alarm', data = null) => {
     
     if (data) {
         document.getElementById('item-id').value = data.id; document.getElementById('item-time').value = data.time; document.getElementById('item-label').value = data.label; document.getElementById('item-yt-url').value = data.youtubeUrl || '';
-        if (type === 'routine') { ui.itemEndTime.value = data.endTime || ''; ui.itemDescription.value = data.description || ''; }
+        if (type === 'routine') { 
+            ui.itemEndTime.value = data.endTime || ''; 
+            ui.itemDescription.value = data.description || ''; 
+            ui.itemCategory.value = data.category || 'default';
+        }
         if (type === 'alarm' && data.days) document.querySelectorAll('.day-selector').forEach(btn => { if (data.days.includes(parseInt(btn.dataset.val))) btn.classList.replace('bg-bg', 'bg-ac'); });
     } else { 
         document.getElementById('item-id').value = ''; document.getElementById('item-time').value = `${padZero(new Date().getHours())}:${padZero(new Date().getMinutes())}`; 
@@ -299,8 +398,19 @@ ui.genericForm.addEventListener('submit', async (e) => {
     } else {
         itemData.date = document.getElementById('routine-date').value; itemData.completed = false;
         itemData.endTime = ui.itemEndTime.value; itemData.description = ui.itemDescription.value;
+        itemData.category = ui.itemCategory.value;
+        
         const index = state.routines.findIndex(r => r.id === itemData.id); if (index > -1) state.routines[index] = itemData; else state.routines.push(itemData);
-        await window.AppDB.saveRoutine(itemData); renderCalendar(); updateSelectedDayView(); showToast("Actividad guardada");
+        await window.AppDB.saveRoutine(itemData); 
+        
+        // Auto-generación de Alarma con fecha
+        const autoAlarmId = itemData.id + '_alarm';
+        const newAlarm = { id: autoAlarmId, time: itemData.time, label: `[Rutina] ${itemData.label}`, days: [], date: itemData.date, active: true, youtubeUrl: itemData.youtubeUrl };
+        const alarmIdx = state.alarms.findIndex(a => a.id === autoAlarmId);
+        if (alarmIdx > -1) state.alarms[alarmIdx] = newAlarm; else state.alarms.push(newAlarm);
+        await window.AppDB.saveAlarm(newAlarm);
+
+        renderCalendar(); updateSelectedDayView(); renderAlarms(); showToast("Actividad (y alarma) guardada");
     }
     closeModal();
 });
@@ -311,9 +421,14 @@ const renderAlarms = () => {
         const card = document.createElement('div'); card.className = `bg-sec rounded-[2rem] p-6 shadow-xl hover:scale-[102%] transition-transform duration-300 relative flex flex-col justify-between min-h-[160px] group ${!alarm.active ? 'opacity-60' : ''}`;
         let displayTime = alarm.time, ampmStr = '';
         if (!state.is24h) { let [h, m] = alarm.time.split(':'); h = parseInt(h); ampmStr = `<span class="text-sm font-bold ml-1 text-soft">${h >= 12 ? 'PM' : 'AM'}</span>`; displayTime = `${h % 12 || 12}:${m}`; }
-        let daysHtml = alarm.days.length > 0 ? [...alarm.days].sort().map(d => `<span class="text-[10px] font-bold bg-bg px-2 py-1 rounded-md text-soft">${state.daysMap[d]}</span>`).join('') : `<span class="text-[10px] font-bold bg-bg px-2 py-1 rounded-md text-soft">Una vez</span>`;
-        let ytIconHtml = alarm.youtubeUrl ? `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="#5C8353" viewBox="0 0 24 24" class="absolute top-6 right-16"><path d="M21.582,6.186c-0.23-0.86-0.908-1.538-1.768-1.768C18.254,4,12,4,12,4S5.746,4,4.186,4.418 c-0.86,0.23-1.538,0.908-1.768,1.768C2,7.746,2,12,2,12s0,4.254,0.418,5.814c0.23,0.86,0.908,1.538,1.768,1.768 C5.746,20,12,20,12,20s6.254,0,7.814-0.418c0.86-0.23,1.538-0.908,1.768-1.768C22,16.254,22,12,22,12S22,7.746,21.582,6.186z M10,15.464V8.536L16,12L10,15.464z"/></svg>` : '';
-        card.innerHTML = `<div class="flex justify-between items-start"><div><h4 class="text-4xl font-black tracking-tight mb-1">${displayTime}${ampmStr}</h4><p class="text-sm font-semibold text-light truncate max-w-[150px]">${alarm.label || 'Alarma'}</p>${ytIconHtml}</div><label class="flex items-center cursor-pointer relative"><input type="checkbox" class="sr-only toggle-checkbox" ${alarm.active ? 'checked' : ''} onchange="toggleAlarm('${alarm.id}')"><div class="toggle-label w-12 h-7 bg-bg rounded-full transition-colors relative"><div class="w-5 h-5 bg-white rounded-full absolute top-1 left-1 transition-all ${alarm.active ? 'translate-x-5' : ''}"></div></div></label></div><div class="flex justify-between items-end mt-4"><div class="flex flex-wrap gap-1 mt-2">${daysHtml}</div><button onclick="deleteAlarm('${alarm.id}')" class="text-red-400 hover:text-red-300 bg-bg/50 p-2 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button></div>`;
+        
+        let subTextHtml = '';
+        if(alarm.date) subTextHtml = `<span class="text-[10px] font-bold bg-bg px-2 py-1 rounded-md text-ac">Día específico</span>`;
+        else if(alarm.days.length > 0) subTextHtml = [...alarm.days].sort().map(d => `<span class="text-[10px] font-bold bg-bg px-2 py-1 rounded-md text-soft">${state.daysMap[d]}</span>`).join('');
+        else subTextHtml = `<span class="text-[10px] font-bold bg-bg px-2 py-1 rounded-md text-soft">Una vez</span>`;
+        
+        let ytIconHtml = alarm.youtubeUrl ? `<svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="14" height="14" fill="#5C8353" viewBox="0 0 24 24" class="absolute top-6 right-16"><path d="M21.582,6.186c-0.23-0.86-0.908-1.538-1.768-1.768C18.254,4,12,4,12,4S5.746,4,4.186,4.418 c-0.86,0.23-1.538,0.908-1.768,1.768C2,7.746,2,12,2,12s0,4.254,0.418,5.814c0.23,0.86,0.908,1.538,1.768,1.768 C5.746,20,12,20,12,20s6.254,0,7.814-0.418c0.86-0.23,1.538-0.908,1.768-1.768C22,16.254,22,12,22,12S22,7.746,21.582,6.186z M10,15.464V8.536L16,12L10,15.464z"/></svg>` : '';
+        card.innerHTML = `<div class="flex justify-between items-start"><div><h4 class="text-4xl font-black tracking-tight mb-1">${displayTime}${ampmStr}</h4><p class="text-sm font-semibold text-light truncate max-w-[150px]">${alarm.label || 'Alarma'}</p>${ytIconHtml}</div><label class="flex items-center cursor-pointer relative"><input type="checkbox" class="sr-only toggle-checkbox" ${alarm.active ? 'checked' : ''} onchange="toggleAlarm('${alarm.id}')"><div class="toggle-label w-12 h-7 bg-bg rounded-full transition-colors relative"><div class="w-5 h-5 bg-white rounded-full absolute top-1 left-1 transition-all ${alarm.active ? 'translate-x-5' : ''}"></div></div></label></div><div class="flex justify-between items-end mt-4"><div class="flex flex-wrap gap-1 mt-2">${subTextHtml}</div><button onclick="deleteAlarm('${alarm.id}')" class="text-red-400 hover:text-red-300 bg-bg/50 p-2 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"><svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button></div>`;
         card.addEventListener('click', (e) => { if(!e.target.closest('label') && !e.target.closest('button')) openModal('alarm', alarm); });
         ui.grid.insertBefore(card, ui.gridAddCard);
     });
@@ -342,7 +457,7 @@ const updateSelectedDayView = () => {
     ui.dayRoutinesList.innerHTML = dayRoutines.length === 0 ? '<p class="text-soft text-sm text-center mt-10">Libre de actividades.</p>' : '';
     
     dayRoutines.forEach(routine => {
-        const el = document.createElement('div'); el.className = `flex justify-between items-center p-4 rounded-xl ${routine.completed ? 'bg-bg/50 opacity-70' : 'bg-bg'} shadow-md`;
+        const el = document.createElement('div'); el.className = `flex justify-between items-center p-4 rounded-xl ${routine.completed ? 'bg-bg/50 opacity-70' : 'bg-bg'} shadow-md border-l-4 border-ac`;
         let timeStr = routine.time; if (!state.is24h) { let [h, m] = timeStr.split(':'); h = parseInt(h); timeStr = `${h%12||12}:${m} <span class="text-[10px]">${h>=12?'PM':'AM'}</span>`; }
         
         let extraInfo = '';
@@ -353,7 +468,7 @@ const updateSelectedDayView = () => {
             extraInfo += `</div>`;
         }
         
-        el.innerHTML = `<div class="flex items-center gap-3"><input type="checkbox" ${routine.completed ? 'checked' : ''} class="w-5 h-5 accent-ac" onchange="toggleRoutine('${routine.id}')"><div class="flex flex-col"><span class="font-bold text-sm ${routine.completed ? 'line-through text-soft' : 'text-white'}">${routine.label}</span><span class="text-xs text-soft font-mono">${timeStr}</span>${extraInfo}</div></div><button onclick="deleteRoutine('${routine.id}')" class="text-red-400 p-2 hover:bg-sec rounded-lg transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>`;
+        el.innerHTML = `<div class="flex items-center gap-3"><input type="checkbox" ${routine.completed ? 'checked' : ''} class="w-5 h-5 accent-ac" onchange="toggleRoutine('${routine.id}')"><div class="flex flex-col"><span class="font-bold text-sm ${routine.completed ? 'line-through text-soft' : 'text-white'}">${routine.label}</span><span class="text-xs text-soft font-mono">${timeStr}</span>${extraInfo}</div></div><button onclick="deleteRoutine('${routine.id}')" class="text-red-400 p-2 hover:bg-sec rounded-lg transition-colors"><svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>`;
         el.addEventListener('click', (e) => { if(e.target.tagName !== 'INPUT' && !e.target.closest('button')) openModal('routine', routine); });
         ui.dayRoutinesList.appendChild(el);
     });
@@ -361,8 +476,8 @@ const updateSelectedDayView = () => {
 
 ui.btnCalPrev.addEventListener('click', () => { state.currentDate.setMonth(state.currentDate.getMonth() - 1); renderCalendar(); });
 ui.btnCalNext.addEventListener('click', () => { state.currentDate.setMonth(state.currentDate.getMonth() + 1); renderCalendar(); });
-window.toggleRoutine = async (id) => { const r = state.routines.find(r => r.id === id); if (r) { r.completed = !r.completed; await window.AppDB.saveRoutine(r); updateSelectedDayView(); } };
-window.deleteRoutine = async (id) => { state.routines = state.routines.filter(r => r.id !== id); await window.AppDB.deleteRoutine(id); renderCalendar(); updateSelectedDayView(); showToast("Eliminada"); };
+window.toggleRoutine = async (id) => { const r = state.routines.find(r => r.id === id); if (r) { r.completed = !r.completed; await window.AppDB.saveRoutine(r); updateSelectedDayView(); updateClock(); } };
+window.deleteRoutine = async (id) => { state.routines = state.routines.filter(r => r.id !== id); await window.AppDB.deleteRoutine(id); renderCalendar(); updateSelectedDayView(); showToast("Eliminada"); updateClock(); };
 
 // --- Lógica: Programar Día (Algoritmo Inteligente) ---
 
@@ -424,19 +539,17 @@ ui.scheduleDayForm.addEventListener('submit', async (e) => {
     
     let newRoutines = [];
     
-    // 1. Tareas Repetitivas (Horarios fijos según intervalo)
     activities.filter(a => a.category === 'repetitiva').forEach(rep => {
         let t = currentMins;
         for(let i=0; i<rep.count; i++) {
             newRoutines.push({
                 id: generateId(), date: dateStr, time: minsToTime(t), endTime: minsToTime(t + rep.duration),
-                label: `${rep.name} (${i+1}/${rep.count})`, description: 'Categoría: Repetitiva (Auto-agendado)', completed: false, youtubeUrl: ''
+                label: `${rep.name} (${i+1}/${rep.count})`, description: 'Categoría: Repetitiva (Auto-agendado)', category: 'repetitiva', completed: false, youtubeUrl: ''
             });
             t += Math.floor(rep.interval * 60);
         }
     });
     
-    // 2. Distribución Inteligente (Tareas Flexibles)
     let heavyWork = activities.filter(a => ['trabajo', 'estudio'].includes(a.category));
     let lightWork = activities.filter(a => ['relajacion', 'ejercicio', 'hobbies'].includes(a.category));
     let continuousHeavyMins = 0;
@@ -446,37 +559,95 @@ ui.scheduleDayForm.addEventListener('submit', async (e) => {
             let h = heavyWork.shift();
             newRoutines.push({
                 id: generateId(), date: dateStr, time: minsToTime(currentMins), endTime: minsToTime(currentMins + h.duration),
-                label: h.name, description: `Categoría: ${h.category.toUpperCase()} (Auto-agendado)`, completed: false, youtubeUrl: ''
+                label: h.name, description: `Categoría: ${h.category.toUpperCase()} (Auto-agendado)`, category: h.category, completed: false, youtubeUrl: ''
             });
             currentMins += h.duration; continuousHeavyMins += h.duration;
             
             if (continuousHeavyMins >= 120) {
                 newRoutines.push({
                     id: generateId(), date: dateStr, time: minsToTime(currentMins), endTime: minsToTime(currentMins + 15),
-                    label: 'Pausa Activa', description: 'Descanso obligatorio (Estirar, beber agua)', completed: false, youtubeUrl: ''
+                    label: 'Pausa Activa', description: 'Descanso obligatorio (Estirar, beber agua)', category: 'relajacion', completed: false, youtubeUrl: ''
                 });
-                currentMins += 15; continuousHeavyMins = 0; // Reiniciar contador de fatiga
+                currentMins += 15; continuousHeavyMins = 0; 
             }
         }
         if (lightWork.length > 0) {
             let l = lightWork.shift();
             newRoutines.push({
                 id: generateId(), date: dateStr, time: minsToTime(currentMins), endTime: minsToTime(currentMins + l.duration),
-                label: l.name, description: `Categoría: ${l.category.toUpperCase()} (Auto-agendado)`, completed: false, youtubeUrl: ''
+                label: l.name, description: `Categoría: ${l.category.toUpperCase()} (Auto-agendado)`, category: l.category, completed: false, youtubeUrl: ''
             });
-            currentMins += l.duration; continuousHeavyMins = 0; // Descanso activo resetea la fatiga
+            currentMins += l.duration; continuousHeavyMins = 0; 
         }
     }
     
-    // Almacenamiento e Inserción al Calendario
     for (const routine of newRoutines) {
         state.routines.push(routine);
         await window.AppDB.saveRoutine(routine);
+        
+        // Auto-crear alarma del día
+        const newAlarm = { id: routine.id + '_alarm', time: routine.time, label: `[Rutina] ${routine.label}`, days: [], date: routine.date, active: true, youtubeUrl: '' };
+        state.alarms.push(newAlarm);
+        await window.AppDB.saveAlarm(newAlarm);
     }
     
-    renderCalendar(); updateSelectedDayView();
-    showToast(`Día planificado con ${newRoutines.length} bloques.`);
+    renderCalendar(); updateSelectedDayView(); renderAlarms();
+    showToast(`Día planificado con ${newRoutines.length} bloques y alarmas activadas.`);
     closeScheduleModal();
+});
+
+// --- Lógica de Exportación a Google Calendar (.ICS) ---
+ui.btnExportGcal.addEventListener('click', () => {
+    const email = ui.gcalEmail.value.trim();
+    if(!email) { showToast('Por favor, ingresa tu correo electrónico primero'); return; }
+    
+    // Filtra rutinas que son hacia el futuro o de hoy en adelante
+    const routinesToExport = state.routines; 
+    if(routinesToExport.length === 0) { showToast('No hay rutinas para exportar'); return; }
+
+    let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//StudyFocus PWA//ES\nCALSCALE:GREGORIAN\nMETHOD:PUBLISH\n";
+    
+    routinesToExport.forEach(r => {
+        const [y, m, d] = r.date.split('-');
+        const [h, min] = r.time.split(':');
+        
+        let start = new Date(y, m-1, d, h, min);
+        let end = new Date(start.getTime() + 30*60000); 
+        if(r.endTime) {
+            const [eh, emin] = r.endTime.split(':');
+            end = new Date(y, m-1, d, eh, emin);
+        }
+        
+        const formatICSDate = (date) => date.toISOString().replace(/-|:|\.\d+/g, '').substring(0, 15) + 'Z';
+        
+        icsContent += "BEGIN:VEVENT\n";
+        icsContent += `UID:${r.id}@studyfocus\n`;
+        icsContent += `DTSTAMP:${formatICSDate(new Date())}\n`;
+        icsContent += `DTSTART:${formatICSDate(start)}\n`;
+        icsContent += `DTEND:${formatICSDate(end)}\n`;
+        icsContent += `SUMMARY:${r.label}\n`;
+        icsContent += `DESCRIPTION:${r.description || 'Rutina generada desde StudyFocus'}\n`;
+        icsContent += `ATTENDEE;RSVP=TRUE:mailto:${email}\n`;
+        // Bloque de Alarma Nativa
+        icsContent += "BEGIN:VALARM\n";
+        icsContent += "TRIGGER:-PT0M\n"; 
+        icsContent += "ACTION:DISPLAY\n";
+        icsContent += "DESCRIPTION:Alerta de Actividad\n";
+        icsContent += "END:VALARM\n";
+        icsContent += "END:VEVENT\n";
+    });
+    
+    icsContent += "END:VCALENDAR";
+    
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'StudyFocus_Rutinas_Alertas.ics';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showToast('Archivo de calendario exportado. Ábrelo en tu celular.');
 });
 
 // --- Controles de Modales de Alarma y Utilidades Generales ---
